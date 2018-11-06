@@ -1,12 +1,9 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
 servers = [
     {
         :name => "k8s-head",
         :type => "master",
-        :box => "ubuntu/xenial64",
-        :box_version => "20180831.0.0",
+        :box => "ubuntu/bionic64",
+        :box_version => "20181105.1.0",
         :eth1 => "192.168.205.10",
         :mem => "2048",
         :cpu => "2"
@@ -14,18 +11,28 @@ servers = [
     {
         :name => "k8s-node-1",
         :type => "node",
-        :box => "ubuntu/xenial64",
-        :box_version => "20180831.0.0",
+        :box => "ubuntu/bionic64",
+        :box_version => "20181105.1.0",
         :eth1 => "192.168.205.11",
         :mem => "2048",
-        :cpu => "2"
+        :cpu => "2",
+        :nfs => "true"
     },
     {
         :name => "k8s-node-2",
         :type => "node",
-        :box => "ubuntu/xenial64",
-        :box_version => "20180831.0.0",
+        :box => "ubuntu/bionic64",
+        :box_version => "20181105.1.0",
         :eth1 => "192.168.205.12",
+        :mem => "2048",
+        :cpu => "2"
+    },
+    {
+        :name => "k8s-node-3",
+        :type => "node",
+        :box => "ubuntu/bionic64",
+        :box_version => "20181105.1.0",
+        :eth1 => "192.168.205.13",
         :mem => "2048",
         :cpu => "2"
     }
@@ -34,13 +41,11 @@ servers = [
 # This script to install k8s using kubeadm will get executed after a box is provisioned
 $configureBox = <<-SCRIPT
 
-    # install docker v17.03
-    # reason for not using docker provision is that it always installs latest version of the docker, but kubeadm requires 17.03 or older
     apt-get update
     apt-get install -y apt-transport-https ca-certificates curl software-properties-common
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
     add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
-    apt-get update && apt-get install -y docker-ce=$(apt-cache madison docker-ce | grep 17.03 | head -1 | awk '{print $3}')
+    apt-get update && apt-get install -y docker-ce
 
     # run docker commands as vagrant user (sudo not required)
     usermod -aG docker vagrant
@@ -62,18 +67,18 @@ EOF
     sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
     # ip of this box
-    IP_ADDR=`ifconfig enp0s8 | grep Mask | awk '{print $2}'| cut -f2 -d:`
+    IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
     # set node-ip
     sudo sed -i "/^[^#]*KUBELET_EXTRA_ARGS=/c\KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" /etc/default/kubelet
     sudo systemctl restart kubelet
 SCRIPT
 
 $configureMaster = <<-SCRIPT
-    echo "This is master"
+    echo "This is the master node"
     # ip of this box
-    IP_ADDR=`ifconfig enp0s8 | grep Mask | awk '{print $2}'| cut -f2 -d:`
+    IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
 
-    # install k8s master
+    # install k8s master node
     HOST_NAME=$(hostname -s)
     kubeadm init --apiserver-advertise-address=$IP_ADDR --apiserver-cert-extra-sans=$IP_ADDR  --node-name $HOST_NAME --pod-network-cidr=172.16.0.0/16
 
@@ -84,8 +89,8 @@ $configureMaster = <<-SCRIPT
 
     # install Calico pod network addon
     export KUBECONFIG=/etc/kubernetes/admin.conf
-    kubectl apply -f https://raw.githubusercontent.com/ecomm-integration-ballerina/kubernetes-cluster/master/calico/rbac-kdd.yaml
-    kubectl apply -f https://raw.githubusercontent.com/ecomm-integration-ballerina/kubernetes-cluster/master/calico/calico.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/rbac-kdd.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/calico.yaml
 
     kubeadm token create --print-join-command >> /etc/kubeadm_join_cmd.sh
     chmod +x /etc/kubeadm_join_cmd.sh
@@ -97,7 +102,7 @@ $configureMaster = <<-SCRIPT
 SCRIPT
 
 $configureNode = <<-SCRIPT
-    echo "This is worker"
+    echo "This is a worker node"
     apt-get install -y sshpass
     sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
     sh ./kubeadm_join_cmd.sh
@@ -105,6 +110,19 @@ SCRIPT
 
 Vagrant.configure("2") do |config|
 
+    required_plugins = %w( vagrant-vbguest vagrant-disksize )
+	_retry = false
+	required_plugins.each do |plugin|
+		unless Vagrant.has_plugin? plugin
+			system "vagrant plugin install #{plugin}"
+			_retry=true
+		end
+	end
+
+	if (_retry)
+		exec "vagrant " + ARGV.join(' ')
+    end
+    
     servers.each do |opts|
         config.vm.define opts[:name] do |config|
 
@@ -116,14 +134,11 @@ Vagrant.configure("2") do |config|
             config.vm.provider "virtualbox" do |v|
 
                 v.name = opts[:name]
-            	 v.customize ["modifyvm", :id, "--groups", "/Ballerina Development"]
+            	v.customize ["modifyvm", :id, "--groups", "/QSEfE"]
                 v.customize ["modifyvm", :id, "--memory", opts[:mem]]
                 v.customize ["modifyvm", :id, "--cpus", opts[:cpu]]
 
             end
-
-            # we cannot use this because we can't install the docker version we want - https://github.com/hashicorp/vagrant/issues/4871
-            #config.vm.provision "docker"
 
             config.vm.provision "shell", inline: $configureBox
 
@@ -132,9 +147,12 @@ Vagrant.configure("2") do |config|
             else
                 config.vm.provision "shell", inline: $configureNode
             end
+            if opts[:nfs]  == "true"
+                config.disksize.size = "40GB"
+            end
 
         end
 
     end
 
-end 
+end
