@@ -71,7 +71,7 @@ EOF
     # set node-ip
     sudo sed -i "/^[^#]*KUBELET_EXTRA_ARGS=/c\KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" /etc/default/kubelet
     sudo systemctl restart kubelet
-    echo "source <(kubectl completion bash)" >> ~/.bashrc
+    echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
 SCRIPT
 
 $configureMaster = <<-SCRIPT
@@ -126,11 +126,15 @@ $configureK8s = <<-SCRIPT
     kubectl label nodes k8s-node-1 role=nfs
 
     # Pull and apply the nfs-provisioner
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-deployment.yaml
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-class.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
 
     # Define the new storage class as default
     kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
+    sudo snap install helm --classic
+
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qsefe/rbac-config.yaml
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -176,12 +180,9 @@ Vagrant.configure("2") do |config|
                 config.disksize.size = "40GB"
                 config.vm.provision "shell", inline: $configureNFS
             end
-            if opts[:type] == "master"
-                config.vm.provision "shell", inline: $configureK8s
-            end
 
         end
 
     end
-
+    
 end
