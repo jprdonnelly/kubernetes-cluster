@@ -21,8 +21,8 @@ elastic-infra:
 edge-auth:
   secrets:
     idpConfigs:
-      - discoveryUrl: "https://djx.auth0.com"
-        clientId: "9kohQL0166VN7RcEv7P7li0gWPBjbiZO"
-        clientSecret : "NLwAqaeyGr38xl19Xb9lBXjt5ra1U-_5LKuFwxBnzvSsqmAUXaT6T7BeQGgIRYOd"
+      - discoveryUrl: "<Insert custom Auth0 URL here"
+        clientId: "<Insert Auth0 Client ID here"
+        clientSecret : "<Insert Auth0 Secret Here>"
         realm: "Auth0"
         hostname: "192.168.205.90"
