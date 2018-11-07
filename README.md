@@ -1,5 +1,5 @@
 # Kubernetes cluster
-A vagrant script for setting up a Kubernetes cluster using Kubeadm
+A vagrant script for setting up a Kubernetes cluster with a load-balancer and dynamic provistioner using Kubeadm
 
 ## Pre-requisites
 
