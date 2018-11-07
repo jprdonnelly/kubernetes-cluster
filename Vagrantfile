@@ -71,6 +71,7 @@ EOF
     # set node-ip
     sudo sed -i "/^[^#]*KUBELET_EXTRA_ARGS=/c\KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" /etc/default/kubelet
     sudo systemctl restart kubelet
+    echo "source <(kubectl completion bash)" >> ~/.bashrc
 SCRIPT
 
 $configureMaster = <<-SCRIPT
@@ -106,6 +107,30 @@ $configureNode = <<-SCRIPT
     apt-get install -y sshpass
     sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
     sh ./kubeadm_join_cmd.sh
+SCRIPT
+
+$configureNFS = <<-SCRIPT
+    echo "This is the NFS provisioner"
+    sudo mkdir -p /storage/dynamic
+    sudo mkdir -p /export
+SCRIPT
+
+$configureK8s = <<-SCRIPT
+    echo "We're running a series of kubectl commands to setup our private cloud..."
+    
+    # Pull and apply the MetalLB load-balancer service, hardcoded to serve private IPs in our host-only network
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/metallb.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/layer-2.yaml
+
+    # Label the node that will host NFS pvs
+    kubectl label nodes k8s-node-1 role=nfs
+
+    # Pull and apply the nfs-provisioner
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-deployment.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-class.yaml
+
+    # Define the new storage class as default
+    kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -147,8 +172,12 @@ Vagrant.configure("2") do |config|
             else
                 config.vm.provision "shell", inline: $configureNode
             end
-            if opts[:nfs]  == "true"
+            if opts[:nfs] == "true"
                 config.disksize.size = "40GB"
+                config.vm.provision "shell", inline: $configureNFS
+            end
+            if opts[:type] == "master"
+                config.vm.provision "shell", inline: $configureK8s
             end
 
         end
