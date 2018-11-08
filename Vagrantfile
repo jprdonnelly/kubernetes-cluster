@@ -41,11 +41,12 @@ servers = [
 # This script to install k8s using kubeadm will get executed after a box is provisioned
 $configureBox = <<-SCRIPT
 
-    apt-get update
-    apt-get install -y apt-transport-https ca-certificates curl software-properties-common nfs-common
+    sudo apt-get update
+    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common nfs-common
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
-    apt-get update && apt-get install -y docker-ce
+    sudo add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+    DOCKERVER=`apt-cache madison docker-ce|grep 18.06|head -1|awk '{print $3}'`
+    sudo apt-get update && sudo apt-get install -y docker-ce="$DOCKERVER"
 
     # run docker commands as vagrant user (sudo not required)
     usermod -aG docker vagrant
@@ -115,9 +116,15 @@ $configureNFS = <<-SCRIPT
     sudo mkdir -p /export
 SCRIPT
 
+#
+# This part can be automated, but has been added as manual commands in the wiki so team can be exposed to commands and steps.
+#
 $configureK8s = <<-SCRIPT
     echo "We're running a series of kubectl commands to setup our private cloud..."
     
+    # Set the default service account as an admin
+    kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=default:default
+
     # Pull and apply the MetalLB load-balancer service, hardcoded to serve private IPs in our host-only network
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/metallb.yaml
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/layer-2.yaml
@@ -132,9 +139,16 @@ $configureK8s = <<-SCRIPT
     # Define the new storage class as default
     kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
-    sudo snap install helm --classic
+    # sudo snap install helm --classic
 
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qsefe/rbac-config.yaml
+    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qsefe/rbac-config.yaml
+
+    # helm init --service-account tiller
+
+    # helm repo add qlik https://qlik.bintray.com/stable
+
+    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qsefe/nfs-vol-pvc.yaml
+
 SCRIPT
 
 Vagrant.configure("2") do |config|
