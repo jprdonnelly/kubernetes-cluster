@@ -44,7 +44,13 @@ $configureBox = <<-SCRIPT
     sudo apt-get update
     sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common nfs-common
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+    # The command below will add a repo listing based on your current Ubuntu release.
     sudo add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+
+    # Check the cache and match to a supported version of docker-ce
+    #### Will need to see if "supported version" check can be disabled in kubeadm, or if a variable can be tied to a check of what is currently \
+    #### the supported version of docker-ce against the latest kubeadm
     DOCKERVER=`apt-cache madison docker-ce|grep 18.06|head -1|awk '{print $3}'`
     sudo apt-get update && sudo apt-get install -y docker-ce="$DOCKERVER"
 
