@@ -53,7 +53,8 @@ $configureBox = <<-SCRIPT
     #### the supported version of docker-ce against the latest kubeadm
     DOCKERVER=`apt-cache madison docker-ce|grep 18.06|head -1|awk '{print $3}'`
     sudo apt-get update && sudo apt-get install -y docker-ce="$DOCKERVER"
-
+    sudo apt-mark hold docker-ce
+    
     # run docker commands as vagrant user (sudo not required)
     usermod -aG docker vagrant
 
