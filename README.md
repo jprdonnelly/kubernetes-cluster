@@ -11,7 +11,7 @@ A [Vagrant](https://www.vagrantup.com/) script for setting up a [Kubernetes](htt
 
 Run the following command using CMD/Powershell in the dir where your [Vagrantfile](https://github.com/jprdonnelly/kubernetes-cluster/blob/master/Vagrantfile "Vagrantfile") lives.
 
-```
+```bash
 vagrant up
 ```
 
@@ -36,12 +36,14 @@ servers = [
 
 ### Check Cluster Health and Update Admin Service Account
 
-```
+```pwsh
 PS C:\users\djx\Documents\GitHub\kubernetes-cluster> vagrant ssh k8s-head
 Welcome to Ubuntu 18.04.1 LTS (GNU/Linux 4.15.0-38-generic x86_64)
  
 <snip output>
- 
+```
+
+```bash
 vagrant@k8s-head:~$ kubectl cluster-info
 Kubernetes master is running at https://192.168.205.10:6443
 KubeDNS is running at https://192.168.205.10:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
@@ -62,7 +64,7 @@ clusterrolebinding.rbac.authorization.k8s.io/default-admin created
 ### Install MetalLB Load Balancer
 You can also use the included YAML files to pull and deploy [MetalLB](https://metallb.universe.tf "MetalLB"), a load balancer that will distribute IPs in a given range.  This has a lot more functionality than we are using, and you can see the other examples at the [project page](https://metallb.universe.tf).
 
-```
+```bash
 vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/metallb.yaml
 namespace/metallb-system created
 serviceaccount/controller created
@@ -82,7 +84,7 @@ configmap/config created
 
 ### Install NFS Provisioner
 
-```
+```bash
 vagrant@k8s-head:~$ kubectl label nodes k8s-node-1 role=nfs
 node/k8s-node-1 labeled
  
@@ -116,13 +118,13 @@ pvc-60cd4de4-e372-11e8-84e2-02c44c503abe   5Gi        RWX            Delete     
 
 Execute the following command to remove the virtual machines created for the Kubernetes cluster.
 
-```
+```bash
 vagrant destroy -f
 ```
 
 You can destroy individual machines by 
 
-```
+```bash
 vagrant destroy k8s-node-3 -f
 ```
 
