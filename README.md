@@ -1,5 +1,5 @@
 # Kubernetes cluster
-A vagrant script for setting up a Kubernetes cluster with a load-balancer and dynamic provistioner using Kubeadm
+A vagrant script for setting up a Kubernetes cluster with a load-balancer and dynamic provisioner using Kubeadm
 
 ## Pre-requisites
 
@@ -8,7 +8,7 @@ A vagrant script for setting up a Kubernetes cluster with a load-balancer and dy
 
 ## How to Run
 
-Execute the following vagrant command to start a new Kubernetes cluster, this will start one master and two nodes:
+Execute the following vagrant command to start a new Kubernetes cluster, this will start one master and three nodes:
 
 ```
 vagrant up
