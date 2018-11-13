@@ -13,9 +13,11 @@ Run the following command using CMD/Powershell in the dir where your [Vagrantfil
 ```
 vagrant up
 ```
+
 * *When this command finishes you will have (4) running VMs joined together as a K8s cluster.*
 * If more than three nodes are required, you can edit the servers array in the Vagrantfile
-```
+
+```ruby
 servers = [
     {
         :name => "k8s-node-3",
@@ -28,9 +30,11 @@ servers = [
     }
 ]
  ```
+ 
 * As you can see above, you can also configure a static IP address, memory and CPU in the servers array. 
 
 ### Check Cluster Health and Update Admin Service Account
+
 ```
 PS C:\users\djx\Documents\GitHub\kubernetes-cluster> vagrant ssh k8s-head
 Welcome to Ubuntu 18.04.1 LTS (GNU/Linux 4.15.0-38-generic x86_64)
@@ -53,8 +57,10 @@ k8s-node-3   Ready    <none>   34s   v1.12.2
 vagrant@k8s-head:~$ kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=default:default
 clusterrolebinding.rbac.authorization.k8s.io/default-admin created
 ```
+
 ### Install MetalLB Load Balancer
 You can also use the included YAML files to pull and deploy [MetalLB](https://metallb.universe.tf "MetalLB"), a load balancer that will distribute IPs in a given range.  This has a lot more functionality than we are using, and you can see the other examples at the [project page](https://metallb.universe.tf).
+
 ```
 vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/metallb.yaml
 namespace/metallb-system created
@@ -72,7 +78,9 @@ deployment.apps/controller created
 vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/layer-2.yaml
 configmap/config created
 ```
+
 ### Install NFS Provisioner
+
 ```
 vagrant@k8s-head:~$ kubectl label nodes k8s-node-1 role=nfs
 node/k8s-node-1 labeled
@@ -106,11 +114,16 @@ pvc-60cd4de4-e372-11e8-84e2-02c44c503abe   5Gi        RWX            Delete     
 ### Clean-up
 
 Execute the following command to remove the virtual machines created for the Kubernetes cluster.
+
 ```
 vagrant destroy -f
 ```
 
-You can destroy individual machines by vagrant destroy k8s-node-1 -f
+You can destroy individual machines by 
+
+```
+vagrant destroy k8s-node-3 -f
+```
 
 ##### Licensing
 
