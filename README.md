@@ -55,7 +55,23 @@ clusterrolebinding.rbac.authorization.k8s.io/default-admin created
 ```
 ### Install MetalLB Load Balancer
 You can also use the included YAML files to pull and deploy [MetalLB](https://metallb.universe.tf "MetalLB"), a load balancer that will distribute IPs in a given range.  This has a lot more functionality than we are using, and you can see the other examples at the [project page](https://metallb.universe.tf).
-
+```
+vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/metallb.yaml
+namespace/metallb-system created
+serviceaccount/controller created
+serviceaccount/speaker created
+clusterrole.rbac.authorization.k8s.io/metallb-system:controller created
+clusterrole.rbac.authorization.k8s.io/metallb-system:speaker created
+role.rbac.authorization.k8s.io/config-watcher created
+clusterrolebinding.rbac.authorization.k8s.io/metallb-system:controller created
+clusterrolebinding.rbac.authorization.k8s.io/metallb-system:speaker created
+rolebinding.rbac.authorization.k8s.io/config-watcher created
+daemonset.apps/speaker created
+deployment.apps/controller created
+ 
+vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/layer-2.yaml
+configmap/config created
+```
 ### Install NFS Provisioner
 ```
 vagrant@k8s-head:~$ kubectl label nodes k8s-node-1 role=nfs
