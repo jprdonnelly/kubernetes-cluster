@@ -1,5 +1,5 @@
 # Kubernetes cluster
-A vagrant script for setting up a Kubernetes cluster with a load-balancer and dynamic provisioner using Kubeadm
+A [Vagrant](https://www.vagrantup.com/) script for setting up a [Kubernetes](https://kubernetes.io/) cluster with a [load-balancer](https://metallb.universe.tf) and [dynamic provisioner](https://github.com/kubernetes-incubator/external-storage/tree/master/nfs) using Kubeadm
 
 ### Pre-requisites
 
