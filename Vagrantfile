@@ -48,16 +48,6 @@ $configureBox = <<-SCRIPT
     # The command below will add a repo listing based on your current Ubuntu release.
     sudo add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
 
-    # Check the cache and match to a supported version of docker-ce
-    #### Will need to see if "supported version" check can be disabled in kubeadm, or if a variable can be tied to a check of what is currently \
-    #### the supported version of docker-ce against the latest kubeadm
-    DOCKERVER=`apt-cache madison docker-ce|grep 18.06|head -1|awk '{print $3}'`
-    sudo apt-get update && sudo apt-get install -y docker-ce="$DOCKERVER"
-    sudo apt-mark hold docker-ce
-    
-    # run docker commands as vagrant user (sudo not required)
-    usermod -aG docker vagrant
-
     # install kubeadm
     apt-get install -y apt-transport-https curl
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
