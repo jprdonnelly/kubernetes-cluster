@@ -108,7 +108,7 @@ SCRIPT
 $configureMaster = <<-SCRIPT
     echo "This is the master node"
     # ip of this box
-    IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
+    IP_ADDR=`ifconfig enp0s3 | grep mask | awk '{print $2}'| cut -f2 -d:`
 
     # install k8s master node
     HOST_NAME=$(hostname -s)
