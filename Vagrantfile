@@ -123,8 +123,11 @@ $configureMaster = <<-SCRIPT
     export KUBECONFIG=/etc/kubernetes/admin.conf
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/rbac-kdd.yaml
     
-    # Calico deprecated.
-    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/calico.yaml
+    # Install CNI Calico (deprecated?).
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/calico.yaml
+    
+    # Install CNI Flannel
+    # kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
     kubeadm token create --print-join-command >> /etc/kubeadm_join_cmd.sh
     chmod +x /etc/kubeadm_join_cmd.sh
@@ -140,10 +143,10 @@ SCRIPT
 
 $configureNode = <<-SCRIPT
     echo "This is a worker node"
-    apt-get install -y sshpass
+    sudo apt-get install -y sshpass
     sudo apt update && sudo apt upgrade -y
     sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
-    sh ./kubeadm_join_cmd.sh
+    sudo sh ./kubeadm_join_cmd.sh
 SCRIPT
 
 $configureNFS = <<-SCRIPT
