@@ -83,13 +83,16 @@ EOF'
 
     # install kubeadm
     sudo apt-get install -y apt-transport-https curl
-    sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-    sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-    deb http://apt.kubernetes.io/ kubernetes-xenial main
-EOF'
-    sudo apt-get update
-    sudo apt-get install -y kubelet kubeadm kubectl
-    sudo apt-mark hold kubelet kubeadm kubectl
+#     sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+#     sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+#     deb http://apt.kubernetes.io/ kubernetes-xenial main
+# EOF'
+#     sudo apt-get update
+#     sudo apt-get install -y kubelet kubeadm kubectl
+
+    sudo snap install --classic kubelet
+    sudo snap install --classic kubeadm
+    sudo snap install --classic kubectl
 
     # kubelet requires swap off
     sudo swapoff -a
