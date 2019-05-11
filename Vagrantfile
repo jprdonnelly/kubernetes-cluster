@@ -83,16 +83,16 @@ EOF'
 
     # install kubeadm
     sudo apt-get install -y apt-transport-https curl
-#     sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-#     sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-#     deb http://apt.kubernetes.io/ kubernetes-xenial main
-# EOF'
-#     sudo apt-get update
-#     sudo apt-get install -y kubelet kubeadm kubectl
+    sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+    sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+    deb http://apt.kubernetes.io/ kubernetes-xenial main
+EOF'
+    sudo apt-get update
+    sudo apt-get install -y kubelet kubeadm kubectl
 
-    sudo snap install --classic kubelet
-    sudo snap install --classic kubeadm
-    sudo snap install --classic kubectl
+    # sudo snap install --classic kubelet
+    # sudo snap install --classic kubeadm
+    # sudo snap install --classic kubectl
 
     # kubelet requires swap off
     sudo swapoff -a
@@ -103,7 +103,7 @@ EOF'
     # ip of this box
     IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
     # set node-ip
-    sudo sed -i "/^[^#]*KUBELET_EXTRA_ARGS=/c\KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" /etc/default/kubelet
+    sudo echo "KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" >> /etc/default/kubelet
     sudo systemctl restart kubelet
     echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
 SCRIPT
@@ -238,6 +238,5 @@ Vagrant.configure("2") do |config|
                 config.vm.provision "shell", inline: $configureNFS
             end
         end
-        # config.vm.provision "shell", inline: $configureK8s
     end  
 end
