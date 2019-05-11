@@ -238,6 +238,6 @@ Vagrant.configure("2") do |config|
                 config.vm.provision "shell", inline: $configureNFS
             end
         end
-        config.vm.provision "shell", inline: $configureK8s
+        # config.vm.provision "shell", inline: $configureK8s
     end  
 end
