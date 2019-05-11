@@ -234,11 +234,7 @@ Vagrant.configure("2") do |config|
                 config.disksize.size = "40GB"
                 config.vm.provision "shell", inline: $configureNFS
             end
-
-            config.vm.provision "shell", inline: $configureK8s
-
         end
-
-    end
-    
+        config.vm.provision "shell", inline: $configureK8s
+    end  
 end
