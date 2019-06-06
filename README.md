@@ -16,7 +16,7 @@ vagrant up
 ```
 
 * *When this command finishes you will have (4) running VMs joined together as a K8s cluster.*
-* If more than three nodes are required, you can edit the servers array in the Vagrantfile
+* If more than three worker nodes are required, you can edit the servers array in the Vagrantfile
 
 ```ruby
 servers = [
