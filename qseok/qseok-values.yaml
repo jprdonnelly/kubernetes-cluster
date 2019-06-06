@@ -1,0 +1,54 @@
+devMode:
+  enabled: true
+# mongodb:
+#         uri: "mongodb://172.17.0.2:27017/admin"
+identity-providers:
+  secrets:
+    idpConfigs:
+      - discoveryUrl: "https://<ReplaceWithYourTenantName>.auth0.com/.well-known/openid-configuration"
+        clientId: "<Insert clientId Here>
+        clientSecret : "<Insert clientSecret Here>"
+        realm: "Auth0"
+        hostname: "elastic.example"
+        claimsMapping:
+          client_id: [ "client_id", "azp" ]
+engine:
+  acceptEULA: "yes"
+  accessControl:
+    enabled: false
+  persistence:
+    enabled: true
+    accessMode: ReadWriteMany
+    existingClaim: qseok-vol
+
+reporting:
+ persistence:
+   enabled: true
+   accessMode: ReadWriteMany
+   existingClaim: qseok-vol
+
+reloads:
+ persistence:
+   enabled: true
+   accessMode: ReadWriteMany
+   existingClaim: qseok-vol
+
+resource-library:
+  persistence:
+    enabled: true
+    accessMode: ReadWriteMany
+    existingClaim: qseok-vol
+
+mira:
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+
+elastic-infra:
+   traefik:
+       rbac:
+           enabled: true
+nginx-ingress:
+   rbac:
+        create: true

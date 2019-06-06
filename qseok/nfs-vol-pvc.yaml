@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: qsefe-vol
+  name: qseok-vol
 spec:
   accessModes:
     - ReadWriteMany
