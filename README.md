@@ -21,10 +21,9 @@ vagrant up
 ```ruby
 servers = [
     {
-        :name => "k8s-node-3",
+        :name => "k8s-node3",
         :type => "node",
         :box => "ubuntu/bionic64",
-        :box_version => "20181105.1.0",
         :eth1 => "192.168.205.13",
         :mem => "2048",
         :cpu => "2"
@@ -52,10 +51,10 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
  
 vagrant@k8s-head:~$ kubectl get nodes
 NAME         STATUS   ROLES    AGE   VERSION
-k8s-head     Ready    master   14m   v1.12.2
-k8s-node-1   Ready    <none>   10m   v1.12.2
-k8s-node-2   Ready    <none>   5m    v1.12.2
-k8s-node-3   Ready    <none>   34s   v1.12.2
+k8s-head     Ready    master   14m   v1.14.2
+k8s-node-1   Ready    <none>   10m   v1.14.2
+k8s-node-2   Ready    <none>   5m    v1.14.2
+k8s-node-3   Ready    <none>   34s   v1.14.2
  
 vagrant@k8s-head:~$ kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=default:default
 clusterrolebinding.rbac.authorization.k8s.io/default-admin created
@@ -85,8 +84,8 @@ configmap/config created
 ### Install NFS Provisioner
 
 ```bash
-vagrant@k8s-head:~$ kubectl label nodes k8s-node-1 role=nfs
-node/k8s-node-1 labeled
+vagrant@k8s-head:~$ kubectl label nodes k8s-node1 role=nfs
+node/k8s-node1 labeled
  
 vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
 service/nfs-provisioner created
@@ -102,16 +101,16 @@ nfs-provisioner   ClusterIP   10.109.234.184   <none>        2049/TCP,20048/TCP,
 vagrant@k8s-head:~$ kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 storageclass.storage.k8s.io/nfs-dynamic patched
  
-vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qsefe/nfs-vol-pvc.yaml
-persistentvolumeclaim/qsefe-vol created
+vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/nfs-vol-pvc.yaml
+persistentvolumeclaim/qseok-vol created
  
 vagrant@k8s-head:~$ kubectl get pvc
 NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-qsefe-vol   Bound    pvc-60cd4de4-e372-11e8-84e2-02c44c503abe   5Gi        RWX            nfs-dynamic    38s
+qseok-vol   Bound    pvc-60cd4de4-e372-11e8-84e2-02c44c503abe   5Gi        RWX            nfs-dynamic    38s
  
 vagrant@k8s-head:~$ kubectl get pv
 NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM               STORAGECLASS   REASON   AGE
-pvc-60cd4de4-e372-11e8-84e2-02c44c503abe   5Gi        RWX            Delete           Bound    default/qsefe-vol   nfs-dynamic
+pvc-60cd4de4-e372-11e8-84e2-02c44c503abe   5Gi        RWX            Delete           Bound    default/qseok-vol   nfs-dynamic
 ```
 
 ### Clean-up
@@ -125,7 +124,7 @@ vagrant destroy -f
 You can destroy individual machines by 
 
 ```bash
-vagrant destroy k8s-node-3 -f
+vagrant destroy k8s-node3 -f
 ```
 
 ##### Licensing
