@@ -12,7 +12,7 @@ servers = [
         :type => "node",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.11",
-        :mem => "2048",
+        :mem => "8192",
         :cpu => "2",
         :nfs => "true"
     },
@@ -21,7 +21,7 @@ servers = [
         :type => "node",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.12",
-        :mem => "2048",
+        :mem => "8192",
         :cpu => "2"
     },
     {
@@ -29,7 +29,7 @@ servers = [
         :type => "node",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.13",
-        :mem => "2048",
+        :mem => "8192",
         :cpu => "2"
     }
 ]
@@ -183,14 +183,14 @@ $configureK8s = <<-SCRIPT
 
     sudo snap install helm --classic
 
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qsefe/rbac-config.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/rbac-config.yaml
 
     helm init --service-account tiller
 
     helm repo add qlik https://qlik.bintray.com/stable
     helm repo add qlik-edge https://qlik.bintray.com/edge
 
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qsefe/nfs-vol-pvc.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/nfs-vol-pvc.yaml
 
 SCRIPT
 
@@ -220,7 +220,7 @@ Vagrant.configure("2") do |config|
             config.vm.provider "virtualbox" do |v|
 
                 v.name = opts[:name]
-            	v.customize ["modifyvm", :id, "--groups", "/QSEfE"]
+            	v.customize ["modifyvm", :id, "--groups", "/QSEoK"]
                 v.customize ["modifyvm", :id, "--memory", opts[:mem]]
                 v.customize ["modifyvm", :id, "--cpus", opts[:cpu]]
 
