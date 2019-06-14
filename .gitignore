@@ -1,7 +1,11 @@
 .vagrant/
 ubuntu-bionic-18.04-cloudimg-console.log
+<<<<<<< HEAD
 *.log
 *.log
 *.log
 *.log
 qmi-k8s-vm.zip
+=======
+>>>>>>> parent of 9adf58d... .
+*.log
