@@ -1,26 +1,10 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-Vagrant.require_version ">= 1.6.2"
-  
-# VERY VERY IMPORTANT:
-# If this is a custom scenario then use '../../shared-content' instead of '../shared-content'
- 
-require 'json'
-# Module to set values configured from QMI client (do not delete)
-require File.dirname(__FILE__)+'../../shared-content/scripts/custom-setup.rb'
-  
-scenario = JSON.parse(File.read(File.join(File.dirname(__FILE__), 'scenario.json')))
-# If values are changed from QMI client then 'vals' will update
-# Values from scenario.json 'config.servers'
-vals = CustomSetup.getValues( scenario )["servers"][0]
-
 servers = [
     {
         :name => "k8s-head",
         :type => "master",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.10",
-        :mem => "4096",
+        :mem => "2048",
         :cpu => "2"
     },
     {
@@ -213,7 +197,7 @@ SCRIPT
 Vagrant.configure("2") do |config|
 
     required_plugins = %w( vagrant-vbguest vagrant-disksize )
-	_retry = true
+	_retry = false
 	required_plugins.each do |plugin|
 		unless Vagrant.has_plugin? plugin
 			system "vagrant plugin install #{plugin}"
