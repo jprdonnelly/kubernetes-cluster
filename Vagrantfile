@@ -1,10 +1,13 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
 servers = [
     {
         :name => "k8s-head",
         :type => "master",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.10",
-        :mem => "2048",
+        :mem => "4192",
         :cpu => "2"
     },
     {
@@ -37,27 +40,12 @@ servers = [
 # This script to install k8s using kubeadm will get executed after a box is provisioned
 $configureBox = <<-SCRIPT
     sudo apt-get update
+    
     sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common nfs-common
     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
     # The command below will add a repo listing based on your current Ubuntu release.
     sudo add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
-
-    ######
-    ###### Uncomment below to use the supported version of docker for kubeadm
-    ######
-    # Check the cache and match to a supported version of docker-ce
-    #### Will need to see if "supported version" check can be disabled in kubeadm, or if a variable can be tied to a check of what is currently \
-    #### the supported version of docker-ce against the latest kubeadm
-    ###########################################################################################################
-    # DOCKERVER=`apt-cache madison docker-ce|grep 18.06|head -1|awk '{print $3}'`
-    # sudo apt-get update && sudo apt-get install -y docker-ce="$DOCKERVER"
-    # sudo apt-mark hold docker-ce
-
-    ######
-    ###### Uncomment below to try and use latest versions
-    ######
-     ###########################################################################################################
     sudo apt-get update && sudo apt-get install -y docker-ce
 
     # Setup daemon.
@@ -88,7 +76,7 @@ EOF'
     deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF'
     sudo apt-get update
-    sudo apt-get install -y kubelet kubeadm kubectl
+    sudo apt-get install -y kubelet kubeadm kubectl 
 
     # sudo snap install --classic kubelet
     # sudo snap install --classic kubeadm
@@ -106,10 +94,18 @@ EOF'
     sudo echo "KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" >> /etc/default/kubelet
     sudo systemctl restart kubelet
     echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
+
+    # Update apt sources to avoid 404s, do so non-interactively to deal with libssl
+    # 
+    echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
+    sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
+    # sudo DEBIAN_FRONTEND=noninteractive sudo dpkg-reconfigure -a
 SCRIPT
 
 $configureMaster = <<-SCRIPT
-    echo "This is the master node"
+    echo "##################################################"
+    echo "Configuring as master node"
+    echo "##################################################"
     # ip of this box
     IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
 
@@ -138,14 +134,12 @@ $configureMaster = <<-SCRIPT
     # required for setting up password less ssh between guest VMs
     sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
     sudo service sshd restart
-
-    # Update apt sources to avoid 404s 
-    sudo apt update && sudo apt upgrade -y
-
 SCRIPT
 
 $configureNode = <<-SCRIPT
-    echo "This is a worker node"
+    echo "##################################################"
+    echo "Configuring as worker node"
+    echo "##################################################"
     sudo apt-get install -y sshpass
     sudo apt update && sudo apt upgrade -y
     sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
@@ -153,7 +147,9 @@ $configureNode = <<-SCRIPT
 SCRIPT
 
 $configureNFS = <<-SCRIPT
-    echo "This is the NFS provisioner"
+    echo "##################################################"
+    echo "Configuring NFS Provisioner Pre-Work"
+    echo "##################################################"
     sudo mkdir -p /storage/dynamic
     sudo mkdir -p /export
 SCRIPT
