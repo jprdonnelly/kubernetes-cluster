@@ -1,18 +1,5 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-Vagrant.require_version ">= 1.6.2"
-  
-# VERY VERY IMPORTANT:
-# If this is a custom scenario then use '../../shared-content' instead of '../shared-content'
- 
-require 'json'
-# Module to set values configured from QMI client (do not delete)
-require File.dirname(__FILE__)+'../../shared-content/scripts/custom-setup.rb'
-  
-scenario = JSON.parse(File.read(File.join(File.dirname(__FILE__), 'scenario.json')))
-# If values are changed from QMI client then 'vals' will update
-# Values from scenario.json 'config.servers'
-vals = CustomSetup.getValues( scenario )["servers"][0]
 
 servers = [
     {
