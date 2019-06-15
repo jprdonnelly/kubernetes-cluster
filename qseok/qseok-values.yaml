@@ -5,13 +5,30 @@ devMode:
 identity-providers:
   secrets:
     idpConfigs:
-      - discoveryUrl: "https://<ReplaceWithYourTenantName>.auth0.com/.well-known/openid-configuration"
-        clientId: "<Insert clientId Here>
-        clientSecret : "<Insert clientSecret Here>"
+      - discoveryUrl: "https://d<Insert Your Domain>.auth0.com/.well-known/openid-configuration"
+        clientId: "9koh6VN7RcEv7P7li0gWPBjbiZO"
+        clientSecret : "NLwAqaBXjt5ra1U-_56T7BeQGgIRYOd"
         realm: "Auth0"
         hostname: "elastic.example"
         claimsMapping:
           client_id: [ "client_id", "azp" ]
+mira:
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+
+elastic-infra:
+   traefik:
+       rbac:
+           enabled: true
+   nginx-ingress:
+       rbac:
+           create: true
+       ingress:
+           annotations:
+             nginx.ingress.kubernetes.io/proxy-body-size: 5g
+             nginx.org/client-max-body-size: 5g
 engine:
   acceptEULA: "yes"
   accessControl:
@@ -39,16 +56,14 @@ resource-library:
     accessMode: ReadWriteMany
     existingClaim: qseok-vol
 
-mira:
-  rbac:
-    create: true
-  serviceAccount:
-    create: true
+temporary-contents:
+  persistence:
+    enabled: true
+    accessMode: ReadWriteMany
+    existingClaim: qseok-vol
 
-elastic-infra:
-   traefik:
-       rbac:
-           enabled: true
-nginx-ingress:
-   rbac:
-        create: true
+qix-datafiles:
+  persistence:
+    enabled: true
+    accessMode: ReadWriteMany
+    existingClaim: qseok-vol
