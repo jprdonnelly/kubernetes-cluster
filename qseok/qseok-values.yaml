@@ -9,51 +9,77 @@ engine:
 identity-providers:           
   secrets:
     idpConfigs:
-      - discoveryUrl: "https://djx.auth0.com/.well-known/openid-configuration"
+      - discoveryUrl: "https://<TENANT>.auth0.com/.well-known/openid-configuration"
         primary: true
-        clientId: "5kohQL0166VN7rcEv7P7li0gWPBjbiZo"
-        clientSecret: "NLwAqaeyGr83xl19Xb9lBXjt5ra1U_-5LKuFwxBnzvSsqmAUXaT6T7BeQGgIRYOd"
+        clientId: "<CLIENT_ID>"
+        clientSecret: "<CLIENT_SEECRET>"
         realm: "Auth0"
-        hostname: "192.168.205.90"
+        hostname: "<INGRESS_IP/HOSTNAME>"
         claimsMapping:
           client_id: [ "client_id", "azp" ]
           groups: "/https:~1~1qlik.com~1groups"
           sub: ["/https:~1~1qlik.com~1sub", "sub"]
-
+# The secondary IdP Config below is for API / Programmatic access.
+    idpConfigs:
+      - discoveryUrl: "https://<TENANT>.auth0.com/.well-known/openid-configuration"
+        primary: false
+        clientId: ""<CLIENT_ID>"
+        clientSecret: "<CLIENT_SEECRET>"
+        realm: "Auth0"
+        hostname: "<INGRESS_IP/HOSTNAME>"
+        claimsMapping:
+          client_id: [ "client_id", "azp" ]
+          groups: "/https:~1~1qlik.com~1groups"
+          sub: ["/https:~1~1qlik.com~1sub", "sub"]
 qix-datafiles:
   persistence:
     accessMode: ReadWriteMany
     enabled: true
-    existingClaim: qseok-vol
+    existingClaim: nfs
 redis:
   persistence:
     accessMode: ReadWriteMany
     enabled: true
-    existingClaim: qseok-vol
+    existingClaim: nfs
 reporting:
   persistence:
     accessMode: ReadWriteMany
     enabled: true
-    existingClaim: qseok-vol
-resource-library:
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: qseok-vol
+    existingClaim: nfs
 temporary-contents:
   persistence:
     accessMode: ReadWriteMany
     enabled: true
-    existingClaim: qseok-vol
+    existingClaim: nfs
 engine:
   acceptEULA: "yes"
   persistence:
     accessMode: ReadWriteMany
     enabled: true
-    existingClaim: qseok-vol
+    existingClaim: nfs
 dcaas:
   dcaas-redis:
     persistence:
       accessMode: ReadWriteMany
       enabled: true
-      existingClaim: qseok-vol
+      existingClaim: nfs
+
+resource-library:
+  persistence:
+    enabled: true
+    accessMode: ReadWriteMany
+    existingClaim: nfs
+
+  mira:
+   rbac:
+       create: true
+   serviceAccount:
+       create: true
+
+elastic-infra:
+   traefik:
+       rbac:
+           enabled: true
+   nginx-ingress:
+       rbac:
+            create: true
