@@ -19,67 +19,6 @@ identity-providers:
           client_id: [ "client_id", "azp" ]
           groups: "/https:~1~1qlik.com~1groups"
           sub: ["/https:~1~1qlik.com~1sub", "sub"]
-# The secondary IdP Config below is for API / Programmatic access.
-    idpConfigs:
-      - discoveryUrl: "https://<TENANT>.auth0.com/.well-known/openid-configuration"
-        primary: false
-        clientId: ""<CLIENT_ID>"
-        clientSecret: "<CLIENT_SEECRET>"
-        realm: "Auth0"
-        hostname: "<INGRESS_IP/HOSTNAME>"
-        claimsMapping:
-          client_id: [ "client_id", "azp" ]
-          groups: "/https:~1~1qlik.com~1groups"
-          sub: ["/https:~1~1qlik.com~1sub", "sub"]
-qix-datafiles:
+global:
   persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: nfs
-redis:
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: nfs
-reporting:
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: nfs
-temporary-contents:
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: nfs
-engine:
-  acceptEULA: "yes"
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: nfs
-dcaas:
-  dcaas-redis:
-    persistence:
-      accessMode: ReadWriteMany
-      enabled: true
-      existingClaim: nfs
-
-resource-library:
-  persistence:
-    enabled: true
-    accessMode: ReadWriteMany
-    existingClaim: nfs
-
-  mira:
-   rbac:
-       create: true
-   serviceAccount:
-       create: true
-
-elastic-infra:
-   traefik:
-       rbac:
-           enabled: true
-   nginx-ingress:
-       rbac:
-            create: true
+    storageClass: "nfs-dynamic"
