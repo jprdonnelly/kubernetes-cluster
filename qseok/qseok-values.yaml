@@ -22,3 +22,40 @@ identity-providers:
 global:
   persistence:
     storageClass: "nfs-dynamic"
+qix-datafiles:
+  persistence:
+    accessMode: ReadWriteMany
+    enabled: true
+    existingClaim: qseok-vol
+redis:
+  persistence:
+    accessMode: ReadWriteMany
+    enabled: true
+    existingClaim: qseok-vol
+reporting:
+  persistence:
+    accessMode: ReadWriteMany
+    enabled: true
+    existingClaim: qseok-vol
+resource-library:
+  persistence:
+    accessMode: ReadWriteMany
+    enabled: true
+    existingClaim: qseok-vol
+temporary-contents:
+  persistence:
+    accessMode: ReadWriteMany
+    enabled: true
+    existingClaim: qseok-vol
+engine:
+  acceptEULA: "yes"
+  persistence:
+    accessMode: ReadWriteMany
+    enabled: true
+    existingClaim: qseok-vol
+dcaas:
+  dcaas-redis:
+    persistence:
+      accessMode: ReadWriteMany
+      enabled: true
+      existingClaim: qseok-vol
