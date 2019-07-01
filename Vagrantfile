@@ -41,7 +41,7 @@ servers = [
 $configureBox = <<-SCRIPT
     sudo apt-get update
     
-    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common nfs-common
+    sudo apt-get install -y socat apt-transport-https ca-certificates curl software-properties-common nfs-common
     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
     # The command below will add a repo listing based on your current Ubuntu release.
@@ -70,17 +70,16 @@ EOF'
     sudo usermod -aG docker vagrant
 
     # install kubeadm
-    sudo apt-get install -y apt-transport-https curl
-    sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
     sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-    deb http://apt.kubernetes.io/ kubernetes-bionic main
+    deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF'
-    sudo apt-get update
-    # sudo apt-get install -y kubelet kubeadm kubectl 
+    # sudo apt update && apt install -y kubeadm=1.14\* kubectl=1.14\* kubelet=1.14\* kubernetes-cni=0.7\*
+    sudo apt update && sudo apt install -y kubeadm kubectl kubelet kubernetes-cni
 
-    sudo snap install --classic kubelet
-    sudo snap install --classic kubeadm
-    sudo snap install --classic kubectl
+    # sudo snap install --classic kubelet
+    # sudo snap install --classic kubeadm
+    # sudo snap install --classic kubectl
 
     # kubelet requires swap off
     sudo swapoff -a
@@ -92,7 +91,7 @@ EOF'
     IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
     # set node-ip
     sudo echo "KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" >> /etc/default/kubelet
-    sudo systemctl restart kubelet
+    sudo snap restart kubelet
     echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
 
     # Update apt sources to avoid 404s, do so non-interactively to deal with libssl
