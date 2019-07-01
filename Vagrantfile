@@ -76,11 +76,11 @@ EOF'
     deb http://apt.kubernetes.io/ kubernetes-bionic main
 EOF'
     sudo apt-get update
-    sudo apt-get install -y kubelet kubeadm kubectl 
+    # sudo apt-get install -y kubelet kubeadm kubectl 
 
-    # sudo snap install --classic kubelet
-    # sudo snap install --classic kubeadm
-    # sudo snap install --classic kubectl
+    sudo snap install --classic kubelet
+    sudo snap install --classic kubeadm
+    sudo snap install --classic kubectl
 
     # kubelet requires swap off
     sudo swapoff -a
