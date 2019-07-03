@@ -19,43 +19,8 @@ identity-providers:
           client_id: [ "client_id", "azp" ]
           groups: "/https:~1~1qlik.com~1groups"
           sub: ["/https:~1~1qlik.com~1sub", "sub"]
+          
+# We use a global persistence statement for maximum compatibility with future releases.  This will create multiple PVCs.
 global:
   persistence:
     storageClass: "nfs-dynamic"
-qix-datafiles:
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: qseok-vol
-redis:
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: qseok-vol
-reporting:
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: qseok-vol
-resource-library:
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: qseok-vol
-temporary-contents:
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: qseok-vol
-engine:
-  acceptEULA: "yes"
-  persistence:
-    accessMode: ReadWriteMany
-    enabled: true
-    existingClaim: qseok-vol
-dcaas:
-  dcaas-redis:
-    persistence:
-      accessMode: ReadWriteMany
-      enabled: true
-      existingClaim: qseok-vol
