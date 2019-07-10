@@ -7,7 +7,7 @@ servers = [
         :type => "master",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.10",
-        :mem => "4192",
+        :mem => "2048",
         :cpu => "2"
     },
     {
@@ -15,7 +15,7 @@ servers = [
         :type => "node",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.11",
-        :mem => "8192",
+        :mem => "4096",
         :cpu => "2",
         :nfs => "true"
     },
@@ -24,29 +24,25 @@ servers = [
         :type => "node",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.12",
-        :mem => "8192",
+        :mem => "4096",
         :cpu => "2"
     },
-    {
-        :name => "k8s-node3",
-        :type => "node",
-        :box => "ubuntu/bionic64",
-        :eth1 => "192.168.205.13",
-        :mem => "8192",
-        :cpu => "2"
-    }
+# Uncomment section below to enable a 3rd worker node.
+#    {
+#        :name => "k8s-node3",
+#        :type => "node",
+#        :box => "ubuntu/bionic64",
+#        :eth1 => "192.168.205.13",
+#        :mem => "4096",
+#        :cpu => "2"
+#    }
 ]
 
 # This script to install k8s using kubeadm will get executed after a box is provisioned
 $configureBox = <<-SCRIPT
-    sudo apt-get update
-    
-    sudo apt-get install -y socat apt-transport-https ca-certificates curl software-properties-common nfs-common
     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-    # The command below will add a repo listing based on your current Ubuntu release.
     sudo add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
-    sudo apt-get update && sudo apt-get install -y docker-ce
+    sudo apt-get update && sudo apt-get install -y ntpdate neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common docker-ce 
 
     # Setup daemon.
     sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
@@ -69,6 +65,9 @@ EOF'
     # run docker commands as vagrant user (sudo not required)
     sudo usermod -aG docker vagrant
 
+    # Set time to ensure IdP works
+    sudo ntpdate pool.ntp.org 
+    
     # install kubeadm
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
     sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
@@ -91,8 +90,12 @@ EOF'
     IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
     # set node-ip
     sudo echo "KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" >> /etc/default/kubelet
-    sudo snap restart kubelet
     echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
+    echo "echo" >> /home/vagrant/.bashrc
+    echo "echo" >> /home/vagrant/.bashrc
+    echo "/usr/bin/neofetch" >> /home/vagrant/.bashrc
+    echo "echo" >> /home/vagrant/.bashrc
+    echo "echo" >> /home/vagrant/.bashrc
 
     # Update apt sources to avoid 404s, do so non-interactively to deal with libssl
     # 
@@ -139,8 +142,7 @@ $configureNode = <<-SCRIPT
     echo "##################################################"
     echo "Configuring as worker node"
     echo "##################################################"
-    sudo apt-get install -y sshpass
-    sudo apt update && sudo apt upgrade -y
+    sudo apt update && sudo apt-get install -y sshpass
     sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
     sudo sh ./kubeadm_join_cmd.sh
 SCRIPT
