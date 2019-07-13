@@ -1,4 +1,3 @@
-:metal::neckbeard::four_leaf_clover::computer::cloud:
 # Kubernetes cluster
 A [Vagrant](https://www.vagrantup.com/) script for setting up a barebones [Kubernetes](https://kubernetes.io/) cluster with a [load-balancer](https://metallb.universe.tf) and [dynamic provisioner](https://github.com/kubernetes-incubator/external-storage/tree/master/nfs) using [Kubeadm](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm/).
 
