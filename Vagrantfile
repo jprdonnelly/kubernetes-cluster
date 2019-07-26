@@ -7,7 +7,7 @@ servers = [
         :type => "master",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.10",
-        :mem => "2048",
+        :mem => "4096",
         :cpu => "2"
     },
     {
@@ -143,7 +143,7 @@ $configureNode = <<-SCRIPT
     echo "Configuring as worker node"
     echo "##################################################"
     sudo apt update && sudo apt-get install -y sshpass
-    sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
+s    sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
     sudo sh ./kubeadm_join_cmd.sh
 SCRIPT
 
