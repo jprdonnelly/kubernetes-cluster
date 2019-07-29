@@ -139,11 +139,10 @@ $configureMaster = <<-SCRIPT
 SCRIPT
 
 $configureNode = <<-SCRIPT
-    echo "##################################################"
-    echo "Configuring as worker node"
-    echo "##################################################"
-    sudo apt update && sudo apt-get install -y sshpass
-s    sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
+    echo "This is a worker node"
+    sudo apt-get install -y sshpass
+    sudo apt update && sudo apt upgrade -y
+    sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
     sudo sh ./kubeadm_join_cmd.sh
 SCRIPT
 
