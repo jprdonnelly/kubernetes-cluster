@@ -1,0 +1,56 @@
+devMode:
+  enabled: true
+
+#mongodb:
+#  uri: "mongodb://qlik:Qlik1234@10.48.10.76:27017/qsefe?ssl=false"
+
+engine:
+  acceptEULA: "yes"
+
+identity-providers:           
+  secrets:
+    idpConfigs:
+      - discoveryUrl: "https://<TENANT>.auth0.com/.well-known/openid-configuration"
+        primary: true
+        clientId: "<CLIENT_ID>"
+        clientSecret: "<CLIENT_SEECRET>"
+        realm: "Auth0"
+        hostname: "<INGRESS_IP/HOSTNAME>"
+        claimsMapping:
+          client_id: [ "client_id", "azp" ]
+          groups: "/https:~1~1qlik.com~1groups"
+          sub: ["/https:~1~1qlik.com~1sub", "sub"]
+
+global:
+  persistence:
+    storageClass: "azurefile"
+
+mongodb:
+  persistence:
+    enabled: true
+    accessMode: ReadWriteMany
+    storageClass: azurefile
+
+featureflags:
+  configmaps:
+    create: true
+    featureFlagsConfig:
+      {  
+        "globalFeatures": {
+          "HUB_MANAGED_SPACES": true,
+          "HOME_HOME": true,
+          "MANAGEMENT_CONSOLE_SPACE_MANAGEMENT_EDIT_ENABLED": true,
+          "MANAGEMENT_CONSOLE_SPACE_MANAGEMENT_MANAGED_SPACES_ENABLED": true,
+          "MANAGEMENT_CONSOLE_SPACE_MANAGEMENT_SORT_FILTER_ENABLED": true,
+          "HUB_GROUPS": true,
+          "createIdpGroups": true,
+          "includeGroupIdsInUserJwt": true,
+          "excludeGroupsFromJwt": true,
+          "MANAGEMENT_CONSOLE_GROUPS_ENABLED": true,
+          "sfdc": true,
+          "enableCsrf": true,
+          "apiClientsEnabled": true
+        },
+        "tenantFeatures": {},
+        "userFeatures": {}
+      }
