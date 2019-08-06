@@ -36,13 +36,16 @@ servers = [
 #        :mem => "4096",
 #        :cpu => "2"
 #    }
-]
+# ]
 
 # This script to install k8s using kubeadm will get executed after a box is provisioned
 $configureBox = <<-SCRIPT
-    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
-    sudo apt-get update && sudo apt-get install -y ntpdate neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common docker-ce 
+    # sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    # sudo add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+    sudo apt-get update && sudo apt-get install -y ntpdate neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common
+
+    # Install Docker - Specify manual version, known validated, until auto-logic added
+    export VERSION=18.09 && curl -sSL get.docker.com | sh
 
     # Setup daemon.
     sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
@@ -113,7 +116,7 @@ $configureMaster = <<-SCRIPT
 
     # install k8s master node
     HOST_NAME=$(hostname -s)
-    kubeadm init --apiserver-advertise-address=$IP_ADDR --apiserver-cert-extra-sans=$IP_ADDR  --node-name $HOST_NAME --pod-network-cidr=172.16.0.0/16
+    kubeadm init --apiserver-advertise-address=$IP_ADDR --apiserver-cert-extra-sans=$IP_ADDR  --node-name $HOST_NAME --pod-network-cidr=172.16.0.0/16 --ignore-preflight-errors=SystemVerification
 
     #copying credentials to regular user - vagrant
     sudo --user=vagrant mkdir -p /home/vagrant/.kube
