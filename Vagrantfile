@@ -26,7 +26,7 @@ servers = [
         :eth1 => "192.168.205.12",
         :mem => "4096",
         :cpu => "2"
-    }
+    },
 # Uncomment section below to enable a 3rd worker node.
 #    {
 #        :name => "k8s-node3",
@@ -36,7 +36,7 @@ servers = [
 #        :mem => "4096",
 #        :cpu => "2"
 #    }
-# ]
+]
 
 # This script to install k8s using kubeadm will get executed after a box is provisioned
 $configureBox = <<-SCRIPT
