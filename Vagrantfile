@@ -26,7 +26,7 @@ servers = [
         :eth1 => "192.168.205.12",
         :mem => "4096",
         :cpu => "2"
-    },
+    }
 # Uncomment section below to enable a 3rd worker node.
 #    {
 #        :name => "k8s-node3",
