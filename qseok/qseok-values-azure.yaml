@@ -7,15 +7,14 @@ devMode:
 engine:
   acceptEULA: "yes"
 
-identity-providers:           
+identity-providers:
   secrets:
     idpConfigs:
-      - discoveryUrl: "https://<TENANT>.auth0.com/.well-known/openid-configuration"
-        primary: true
-        clientId: "<CLIENT_ID>"
-        clientSecret: "<CLIENT_SEECRET>"
+      - discoveryUrl: "https://djx.auth0.com/.well-known/openid-configuration"
+        clientId: "9kohQL0166VN7RcEv7P7li0gWPBjbiZO"
+        clientSecret : "NLwAqaeyGr38xl19Xb9lBXjt5ra1U-_5LKuFwxBnzvSsqmAUXaT6T7BeQGgIRYOd"
         realm: "Auth0"
-        hostname: "<INGRESS_IP/HOSTNAME>"
+        hostname: "192.168.205.90"
         claimsMapping:
           client_id: [ "client_id", "azp" ]
           groups: "/https:~1~1qlik.com~1groups"
@@ -23,13 +22,13 @@ identity-providers:
 
 global:
   persistence:
-    storageClass: "azurefile"
+    storageClass: "nfs-dynamic"
 
 mongodb:
   persistence:
     enabled: true
     accessMode: ReadWriteMany
-    storageClass: azurefile
+    storageClass: nfs-dynamic
 
 featureflags:
   configmaps:
