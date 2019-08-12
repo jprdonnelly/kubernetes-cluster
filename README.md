@@ -32,10 +32,10 @@ servers = [
  
 * As you can see above, you can also configure a static IP address, memory and CPU in the servers array. 
 
-### Check Cluster Health and Update Admin Service Account
+### Check Cluster Health
 
 ```pwsh
-PS C:\users\djx\Documents\GitHub\kubernetes-cluster> vagrant ssh k8s-head
+PS> vagrant ssh k8s-head
 Welcome to Ubuntu 18.04.1 LTS (GNU/Linux 4.15.0-38-generic x86_64)
  
 <snip output>
@@ -49,42 +49,17 @@ KubeDNS is running at https://192.168.205.10:6443/api/v1/namespaces/kube-system/
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
  
 vagrant@k8s-head:~$ kubectl get nodes
-NAME         STATUS   ROLES    AGE   VERSION
-k8s-head     Ready    master   14m   v1.14.2
-k8s-node-1   Ready    <none>   10m   v1.14.2
-k8s-node-2   Ready    <none>   5m    v1.14.2
-k8s-node-3   Ready    <none>   34s   v1.14.2
- 
-vagrant@k8s-head:~$ kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=default:default
-clusterrolebinding.rbac.authorization.k8s.io/default-admin created
+NAME        STATUS   ROLES    AGE   VERSION
+k8s-head    Ready    master   68m   v1.15.2
+k8s-nfs     Ready    <none>   53m   v1.15.2
+k8s-node1   Ready    <none>   65m   v1.15.2
+k8s-node2   Ready    <none>   61m   v1.15.2
 ```
-
-### Install MetalLB Load Balancer
-You can also use the included YAML files to pull and deploy [MetalLB](https://metallb.universe.tf "MetalLB"), a load balancer that will distribute IPs in a given range.  This has a lot more functionality than we are using, and you can see the other examples at the [project page](https://metallb.universe.tf).
-
-```bash
-vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/metallb.yaml
-namespace/metallb-system created
-serviceaccount/controller created
-serviceaccount/speaker created
-clusterrole.rbac.authorization.k8s.io/metallb-system:controller created
-clusterrole.rbac.authorization.k8s.io/metallb-system:speaker created
-role.rbac.authorization.k8s.io/config-watcher created
-clusterrolebinding.rbac.authorization.k8s.io/metallb-system:controller created
-clusterrolebinding.rbac.authorization.k8s.io/metallb-system:speaker created
-rolebinding.rbac.authorization.k8s.io/config-watcher created
-daemonset.apps/speaker created
-deployment.apps/controller created
- 
-vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/layer-2.yaml
-configmap/config created
-```
-
 ### Install NFS Provisioner
 
 ```bash
-vagrant@k8s-head:~$ kubectl label nodes k8s-node1 role=nfs
-node/k8s-node1 labeled
+vagrant@k8s-head:~$ kubectl label nodes k8s-nfs role=nfs
+node/k8s-nfs labeled
  
 vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
 service/nfs-provisioner created
@@ -100,16 +75,6 @@ nfs-provisioner   ClusterIP   10.109.234.184   <none>        2049/TCP,20048/TCP,
 vagrant@k8s-head:~$ kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 storageclass.storage.k8s.io/nfs-dynamic patched
  
-vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/nfs-vol-pvc.yaml
-persistentvolumeclaim/qseok-vol created
- 
-vagrant@k8s-head:~$ kubectl get pvc
-NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-qseok-vol   Bound    pvc-60cd4de4-e372-11e8-84e2-02c44c503abe   5Gi        RWX            nfs-dynamic    38s
- 
-vagrant@k8s-head:~$ kubectl get pv
-NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM               STORAGECLASS   REASON   AGE
-pvc-60cd4de4-e372-11e8-84e2-02c44c503abe   5Gi        RWX            Delete           Bound    default/qseok-vol   nfs-dynamic
 ```
 
 ### Clean-up

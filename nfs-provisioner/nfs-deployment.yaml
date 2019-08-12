@@ -32,11 +32,6 @@ spec:
         app: nfs-provisioner
     spec:
       # The following toleration and nodeSelector will place the nfs provisioner
-      tolerations:
-      - key: "dedicated"
-        operator: "Equal"
-        value: "nfs"
-        effect: "NoSchedule"
       nodeSelector:
         role: nfs
       containers:

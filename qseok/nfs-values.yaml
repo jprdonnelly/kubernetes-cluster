@@ -36,7 +36,7 @@ persistence:
   storageClass: "standard"
 
   accessMode: ReadWriteOnce
-  size: 20Gi
+  size: 39Gi
 
 ## For creating the StorageClass automatically:
 storageClass:

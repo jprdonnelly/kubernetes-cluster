@@ -7,7 +7,7 @@ servers = [
         :type => "master",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.10",
-        :mem => "2048",
+        :mem => "3072",
         :cpu => "2"
     },
     {
@@ -17,7 +17,7 @@ servers = [
         :eth1 => "192.168.205.11",
         :mem => "4096",
         :cpu => "2",
-        :nfs => "true"
+        # :nfs => "true"
     },
     {
         :name => "k8s-node2",
@@ -25,36 +25,54 @@ servers = [
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.12",
         :mem => "4096",
-        :cpu => "2"
+        :cpu => "2",
+    },
+    {
+      :name => "k8s-nfs",
+      :type => "nfs",
+      :box => "ubuntu/bionic64",
+      :eth1 => "192.168.205.14",
+      :mem => "2048",
+      :cpu => "1"
     },
 # Uncomment section below to enable a 3rd worker node.
-#    {
-#        :name => "k8s-node3",
-#        :type => "node",
-#        :box => "ubuntu/bionic64",
-#        :eth1 => "192.168.205.13",
-#        :mem => "4096",
-#        :cpu => "2"
-#    }
+    # {
+    #   :name => "k8s-node3",
+    #   :type => "node",
+    #   :box => "ubuntu/bionic64",
+    #   :eth1 => "192.168.205.13",
+    #   :mem => "4096",
+    #   :cpu => "2",
+    # }
 ]
 
-# This script to install k8s using kubeadm will get executed after a box is provisioned
 $configureBox = <<-SCRIPT
     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
     sudo add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
-    sudo apt-get update && sudo apt-get install -y ntpdate neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common docker-ce 
-
-    # Setup daemon.
-    sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
-    {
-    "exec-opts": ["native.cgroupdriver=systemd"],
-    "log-driver": "json-file",
-    "log-opts": {
-        "max-size": "100m"
-    },
-    "storage-driver": "overlay2"
-    }
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+    sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+    deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF'
+    sudo apt update && sudo apt install -y ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni docker-ce
+
+    # sudo snap install --classic kubelet
+    # sudo snap install --classic kubeadm
+    # sudo snap install --classic kubectl
+
+    # Install Docker - Specify manual version, known validated, until auto-logic added
+#     export VERSION=18.09 && curl -sSL get.docker.com | sh
+
+#     # Setup daemon.
+#     sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
+#     {
+#     "exec-opts": ["native.cgroupdriver=systemd"],
+#     "log-driver": "json-file",
+#     "log-opts": {
+#         "max-size": "100m"
+#     },
+#     "storage-driver": "overlay2"
+#     }
+# EOF'
 
     sudo mkdir -p /etc/systemd/system/docker.service.d
 
@@ -67,18 +85,6 @@ EOF'
 
     # Set time to ensure IdP works
     sudo ntpdate pool.ntp.org 
-    
-    # install kubeadm
-    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-    sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-    deb http://apt.kubernetes.io/ kubernetes-xenial main
-EOF'
-    # sudo apt update && apt install -y kubeadm=1.14\* kubectl=1.14\* kubelet=1.14\* kubernetes-cni=0.7\*
-    sudo apt update && sudo apt install -y kubeadm kubectl kubelet kubernetes-cni
-
-    # sudo snap install --classic kubelet
-    # sudo snap install --classic kubeadm
-    # sudo snap install --classic kubectl
 
     # kubelet requires swap off
     sudo swapoff -a
@@ -105,15 +111,15 @@ EOF'
 SCRIPT
 
 $configureMaster = <<-SCRIPT
-    echo "##################################################"
+    echo "################################################################"
     echo "Configuring as master node"
-    echo "##################################################"
+    echo "################################################################"
     # ip of this box
     IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
 
     # install k8s master node
     HOST_NAME=$(hostname -s)
-    kubeadm init --apiserver-advertise-address=$IP_ADDR --apiserver-cert-extra-sans=$IP_ADDR  --node-name $HOST_NAME --pod-network-cidr=172.16.0.0/16
+    kubeadm init --apiserver-advertise-address=$IP_ADDR --apiserver-cert-extra-sans=$IP_ADDR  --node-name $HOST_NAME --pod-network-cidr=172.16.0.0/16 --ignore-preflight-errors=SystemVerification
 
     #copying credentials to regular user - vagrant
     sudo --user=vagrant mkdir -p /home/vagrant/.kube
@@ -133,67 +139,62 @@ $configureMaster = <<-SCRIPT
     kubeadm token create --print-join-command >> /etc/kubeadm_join_cmd.sh
     chmod +x /etc/kubeadm_join_cmd.sh
 
+    # # Set the default service account as an admin
+    kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=default:default
+
+    echo "################################################################"
+    echo "Install MetalLB as Load Balancer"
+    echo "################################################################"
+    # # Pull and apply the MetalLB load-balancer service, hardcoded to serve private IPs in our host-only network
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/metallb.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/layer-2.yaml
+
+    echo "################################################################"
+    echo " Apply RBAC settings for tiller"
+    echo "################################################################"
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/rbac-config.yaml
+
     # required for setting up password less ssh between guest VMs
     sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
     sudo service sshd restart
 SCRIPT
 
 $configureNode = <<-SCRIPT
-    echo "##################################################"
-    echo "Configuring as worker node"
-    echo "##################################################"
-    sudo apt update && sudo apt-get install -y sshpass
+    echo "This is a worker node"
     sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
     sudo sh ./kubeadm_join_cmd.sh
 SCRIPT
 
 $configureNFS = <<-SCRIPT
-    echo "##################################################"
-    echo "Configuring NFS Provisioner Pre-Work"
-    echo "##################################################"
+    echo "################################################################"
+    echo " Configuring NFS Provisioner Pre-Work"
+    echo "################################################################"
     sudo mkdir -p /storage/dynamic
     sudo mkdir -p /export
-SCRIPT
-
-#
-# This part can be automated, but has been added as manual commands in the wiki so team can be exposed to commands and steps.
-#
-$configureK8s = <<-SCRIPT
-    echo "We're running a series of kubectl commands to setup our private cloud..."
-    
-    # Set the default service account as an admin
-    kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=default:default
-
-    # Pull and apply the MetalLB load-balancer service, hardcoded to serve private IPs in our host-only network
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/metallb.yaml
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/layer-2.yaml
+    sudo mkfs.xfs -f /dev/nvme0n1
+    sudo mount /dev/nvme0n1 /storage/dynamic
+    sudo chown vagrant:vagrant /storage/dynamic
+    sudo chmod -R 777 /storage/dynamic
 
     # Label the node that will host NFS pvs
-    kubectl label nodes k8s-node1 role=nfs
+    # kubectl label nodes k8s-nfs role=nfs
+    # kubectl taint nodes k8s-nfs key=value:NoSchedule
 
-    # Pull and apply the nfs-provisioner
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
+    # echo "################################################################"
+    # echo " Deploy nfs-provisioner in k8s cluster
+    # echo " using dedicated disk attached to  k8s-node1"
+    # echo "################################################################"
+    # # Pull and apply the nfs-provisioner
+    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
+    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
 
-    # Define the new storage class as default
-    kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-
-    sudo snap install helm --classic
-
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/rbac-config.yaml
-
-    helm init --service-account tiller
-
-    helm repo add qlik https://qlik.bintray.com/stable
-    helm repo add qlik-edge https://qlik.bintray.com/edge
-
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/nfs-vol-pvc.yaml
-
+    # # Define the new storage class as default
+    # kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 SCRIPT
 
 Vagrant.configure("2") do |config|
 
-    required_plugins = %w( vagrant-vbguest vagrant-disksize )
+  required_plugins = %w( vagrant-vbguest vagrant-scp )
 	_retry = false
 	required_plugins.each do |plugin|
 		unless Vagrant.has_plugin? plugin
@@ -204,36 +205,50 @@ Vagrant.configure("2") do |config|
 
 	if (_retry)
 		exec "vagrant " + ARGV.join(' ')
-    end
+  end
     
-    servers.each do |opts|
-        config.vm.define opts[:name] do |config|
+  servers.each do |opts|
+    config.vm.define opts[:name] do |config|
+      config.vm.box = opts[:box]
+      config.vm.box_version = opts[:box_version]
+      config.vm.hostname = opts[:name]
+      config.vm.network :private_network, ip: opts[:eth1]
 
-            config.vm.box = opts[:box]
-            config.vm.box_version = opts[:box_version]
-            config.vm.hostname = opts[:name]
-            config.vm.network :private_network, ip: opts[:eth1]
+      config.vm.provider "virtualbox" do |vb|
+        vb.name = opts[:name]
+        vb.linked_clone = true
+        vb.customize ["modifyvm", :id, "--groups", "/QSEoK"]
+        vb.customize ["modifyvm", :id, "--memory", opts[:mem]]
+        vb.customize ["modifyvm", :id, "--cpus", opts[:cpu]]
+      end # VB
 
-            config.vm.provider "virtualbox" do |v|
+      config.vm.provision "shell", inline: $configureBox
 
-                v.name = opts[:name]
-            	v.customize ["modifyvm", :id, "--groups", "/QSEoK"]
-                v.customize ["modifyvm", :id, "--memory", opts[:mem]]
-                v.customize ["modifyvm", :id, "--cpus", opts[:cpu]]
+      config.vm.provider "virtualbox" do |nfs|
+        if opts[:type] == "nfs"
+          disk = 'nfsdisk.vmdk'
+          if !File.exist?(disk)
+            nfs.customize [ "createmedium", "disk", "--filename", "nfsdisk.vmdk", "--format", "vmdk", "--size", "40960" ]
+            nfs.customize [ "storagectl", :id, "--name", "nvme", "--add", "pcie", "--controller", "nvme", "--portcount", "1", "--hostiocache", "on", "--bootable", "off" ]
+            nfs.customize [ "storageattach", :id , "--storagectl", "nvme", "--port", "0", "--device", "0", "--type", "hdd", "--medium", "nfsdisk.vmdk" ]
+            # config.vm.provision "shell", inline: $configureNFS
+          else
+            # nfs.customize [ "storagectl", :id, "--name", "nvme", "--add", "pcie", "--controller", "nvme", "--portcount", "1", "--hostiocache", "on", "--bootable", "off" ]
+            nfs.customize [ "storageattach", :id , "--storagectl", "nvme", "--port", "0", "--device", "0", "--type", "hdd", "--medium", "nfsdisk.vmdk" ]
+            # config.vm.provision "shell", inline: $configureNFS
+          end
+        end # End if NFS
+      end # config NFS
 
-            end
+      if opts[:type] == "master"
+        config.vm.provision "shell", inline: $configureMaster
+      elsif opts[:type] == "nfs"
+        config.vm.provision "shell", inline: $configureNode
+        config.vm.provision "shell", inline: $configureNFS
+      else
+        config.vm.provision "shell", inline: $configureNode  
+      end # End type loop
 
-            config.vm.provision "shell", inline: $configureBox
-
-            if opts[:type] == "master"
-                config.vm.provision "shell", inline: $configureMaster
-                            else
-                config.vm.provision "shell", inline: $configureNode
-            end
-            if opts[:nfs] == "true"
-                config.disksize.size = "40GB"
-                config.vm.provision "shell", inline: $configureNFS
-            end
-        end
-    end  
+    end
+  end #End opts
 end
