@@ -88,7 +88,10 @@ EOF'
     # keep swap off after reboot
     sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
-    sudo apt update && sudo apt install -y ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
+    echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
+
+    sudo DEBIAN_FRONTEND=noninteractive apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
+    sudo apt install -y ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
 
     # ip of this box
     IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
@@ -101,11 +104,11 @@ EOF'
     echo "echo" >> /home/vagrant/.bashrc
     echo "echo" >> /home/vagrant/.bashrc
 
-    # Update apt sources to avoid 404s, do so non-interactively to deal with libssl
-    # 
-    echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
-    sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
-    # sudo DEBIAN_FRONTEND=noninteractive sudo dpkg-reconfigure -a
+    # # Update apt sources to avoid 404s, do so non-interactively to deal with libssl
+    # # 
+    # echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
+    # sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+    # # sudo DEBIAN_FRONTEND=noninteractive sudo dpkg-reconfigure -a
 SCRIPT
 
 $configureMaster = <<-SCRIPT
@@ -189,6 +192,12 @@ $configureNFS = <<-SCRIPT
     # # Define the new storage class as default
     # kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 SCRIPT
+
+# Insanely broken - barely fit for testing
+# $configureIngress = <<-SCRIPT
+#   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+#   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
+# SCRIPT
 
 Vagrant.configure("2") do |config|
 
