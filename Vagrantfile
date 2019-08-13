@@ -47,32 +47,28 @@ servers = [
 ]
 
 $configureBox = <<-SCRIPT
-    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
-    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-    sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-    deb http://apt.kubernetes.io/ kubernetes-xenial main
+  curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+  sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+  deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF'
-    sudo apt update && sudo apt install -y ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni docker-ce
+
+export VERSION=18.09 && curl -sSL get.docker.com | sh
+
+# Setup daemon.
+  sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
+  {
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+      "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+  }
+EOF'
 
     # sudo snap install --classic kubelet
     # sudo snap install --classic kubeadm
     # sudo snap install --classic kubectl
-
-    # Install Docker - Specify manual version, known validated, until auto-logic added
-#     export VERSION=18.09 && curl -sSL get.docker.com | sh
-
-#     # Setup daemon.
-#     sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
-#     {
-#     "exec-opts": ["native.cgroupdriver=systemd"],
-#     "log-driver": "json-file",
-#     "log-opts": {
-#         "max-size": "100m"
-#     },
-#     "storage-driver": "overlay2"
-#     }
-# EOF'
 
     sudo mkdir -p /etc/systemd/system/docker.service.d
 
@@ -91,6 +87,8 @@ EOF'
 
     # keep swap off after reboot
     sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+    sudo apt update && sudo apt install -y ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
 
     # ip of this box
     IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
