@@ -7,7 +7,7 @@ servers = [
         :type => "master",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.10",
-        :mem => "3072",
+        :mem => "3200",
         :cpu => "2"
     },
     {
@@ -15,7 +15,7 @@ servers = [
         :type => "node",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.11",
-        :mem => "4096",
+        :mem => "4224",
         :cpu => "2",
         # :nfs => "true"
     },
@@ -24,7 +24,7 @@ servers = [
         :type => "node",
         :box => "ubuntu/bionic64",
         :eth1 => "192.168.205.12",
-        :mem => "4096",
+        :mem => "4224",
         :cpu => "2",
     },
     {
@@ -32,7 +32,7 @@ servers = [
       :type => "nfs",
       :box => "ubuntu/bionic64",
       :eth1 => "192.168.205.14",
-      :mem => "2048",
+      :mem => "2176",
       :cpu => "1"
     },
 # Uncomment section below to enable a 3rd worker node.
@@ -41,7 +41,7 @@ servers = [
     #   :type => "node",
     #   :box => "ubuntu/bionic64",
     #   :eth1 => "192.168.205.13",
-    #   :mem => "4096",
+    #   :mem => "4224",
     #   :cpu => "2",
     # }
 ]
@@ -235,7 +235,7 @@ Vagrant.configure("2") do |config|
         if opts[:type] == "nfs"
           disk = 'nfsdisk.vmdk'
           if !File.exist?(disk)
-            nfs.customize [ "createmedium", "disk", "--filename", "nfsdisk.vmdk", "--format", "vmdk", "--size", "40960" ]
+            nfs.customize [ "createmedium", "disk", "--filename", "nfsdisk.vmdk", "--format", "vmdk", "--size", "42240" ]
             nfs.customize [ "storagectl", :id, "--name", "nvme", "--add", "pcie", "--controller", "nvme", "--portcount", "1", "--hostiocache", "on", "--bootable", "off" ]
             nfs.customize [ "storageattach", :id , "--storagectl", "nvme", "--port", "0", "--device", "0", "--type", "hdd", "--medium", "nfsdisk.vmdk" ]
             # config.vm.provision "shell", inline: $configureNFS
