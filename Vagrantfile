@@ -3,47 +3,46 @@
 
 servers = [
     {
-        :name => "k8s-head",
-        :type => "master",
-        :box => "ubuntu/bionic64",
-        :eth1 => "192.168.205.10",
-        :mem => "3200",
-        :cpu => "2"
-    },
-    {
-        :name => "k8s-node1",
-        :type => "node",
-        :box => "ubuntu/bionic64",
-        :eth1 => "192.168.205.11",
-        :mem => "4224",
-        :cpu => "2",
-        # :nfs => "true"
-    },
-    {
-        :name => "k8s-node2",
-        :type => "node",
-        :box => "ubuntu/bionic64",
-        :eth1 => "192.168.205.12",
-        :mem => "4224",
-        :cpu => "2",
+      :name => "k8s-head",
+      :type => "master",
+      :box => "ubuntu/bionic64",
+      :eth1 => "192.168.205.10",
+      :mem => "3200",
+      :cpu => "2"
     },
     {
       :name => "k8s-nfs",
       :type => "nfs",
       :box => "ubuntu/bionic64",
       :eth1 => "192.168.205.14",
-      :mem => "2176",
-      :cpu => "1"
+      :mem => "4224",
+      :cpu => "2"
+    },
+    {
+      :name => "k8s-node1",
+      :type => "node",
+      :box => "ubuntu/bionic64",
+      :eth1 => "192.168.205.11",
+      :mem => "8192",
+      :cpu => "2",
+    },
+    {
+      :name => "k8s-node2",
+      :type => "node",
+      :box => "ubuntu/bionic64",
+      :eth1 => "192.168.205.12",
+      :mem => "8192",
+      :cpu => "2",
     },
 # Uncomment section below to enable a 3rd worker node.
-    # {
-    #   :name => "k8s-node3",
-    #   :type => "node",
-    #   :box => "ubuntu/bionic64",
-    #   :eth1 => "192.168.205.13",
-    #   :mem => "4224",
-    #   :cpu => "2",
-    # }
+    {
+      :name => "k8s-node3",
+      :type => "node",
+      :box => "ubuntu/bionic64",
+      :eth1 => "192.168.205.13",
+      :mem => "8192",
+      :cpu => "2",
+    }
 ]
 
 $configureBox = <<-SCRIPT
@@ -91,7 +90,7 @@ EOF'
     echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
 
     sudo DEBIAN_FRONTEND=noninteractive apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
-    sudo apt install -y ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
 
     # ip of this box
     IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
@@ -179,13 +178,14 @@ $configureNFS = <<-SCRIPT
 
     # Label the node that will host NFS pvs
     # kubectl label nodes k8s-nfs role=nfs
-    # kubectl taint nodes k8s-nfs key=value:NoSchedule
+    # kubectl taint nodes k8s-nfs key=value:NoSchkubectl label nodes k8s-nfs role=nfsedule
 
     # echo "################################################################"
     # echo " Deploy nfs-provisioner in k8s cluster
     # echo " using dedicated disk attached to  k8s-node1"
     # echo "################################################################"
     # # Pull and apply the nfs-provisioner
+    # sleep 60
     # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
     # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
 
@@ -235,7 +235,7 @@ Vagrant.configure("2") do |config|
         if opts[:type] == "nfs"
           disk = 'nfsdisk.vmdk'
           if !File.exist?(disk)
-            nfs.customize [ "createmedium", "disk", "--filename", "nfsdisk.vmdk", "--format", "vmdk", "--size", "42240" ]
+            nfs.customize [ "createmedium", "disk", "--filename", "nfsdisk.vmdk", "--format", "vmdk", "--size", "103424" ]
             nfs.customize [ "storagectl", :id, "--name", "nvme", "--add", "pcie", "--controller", "nvme", "--portcount", "1", "--hostiocache", "on", "--bootable", "off" ]
             nfs.customize [ "storageattach", :id , "--storagectl", "nvme", "--port", "0", "--device", "0", "--type", "hdd", "--medium", "nfsdisk.vmdk" ]
             # config.vm.provision "shell", inline: $configureNFS

@@ -1,8 +1,8 @@
 keycloak:
   hostAliases:
-   - ip: "192.168.205.90"
+   - ip: "192.168.205.91"
      hostnames:
-       - "keycloak.example"
+       - "keycloak.local"
 
   replicas: 1
   restartPolicy: Always
@@ -31,8 +31,19 @@ keycloak:
     #   exec:
     #     command: ["/bin/sh", "-c", "ls"]
 
+  keycloak:
+  extraVolumes: |
+    - name: realm-secret
+      secret:
+        secretName: realm-secret
+
+  extraVolumeMounts: |
+    - name: realm-secret
+      mountPath: "/realm/"
+      readOnly: true
+      
   ## Additional arguments to start command e.g. -Dkeycloak.import= to load a realm
-  extraArgs: ""
+  extraArgs: "-Dkeycloak.import=/realm/realm.json"
 
   # Username for the initial Keycloak admin user
   username: keycloak
@@ -103,7 +114,7 @@ keycloak:
     enabled: true
     path: /
     hosts:
-      - keycloak.example
+      - keycloak.local
   # Route for OpenShift
   # route:
   #   enabled: true
