@@ -20,14 +20,10 @@ engine:
     enabled: true
 
 elastic-infra:
-  ingress:
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-body-size: 10240m
-      nginx.org/client-max-body-size: 10240m
   nginx-ingress:
     controller:
-      extraArgs:
-        default-ssl-certificate: default/<name>
+      # extraArgs:
+      #   default-ssl-certificate: default/<name>
       service:
         annotations:
           service.beta.kubernetes.io/azure-load-balancer-tcp-idle-timeout: '3600'
@@ -42,7 +38,7 @@ identity-providers:
         realm: "Auth0"
         hostname: "elastic.local"
         # scope: "openid"
-        primary: true
+        # primary: true
         useClaimsFromIdToken: true
         # claimsMapping:
           # client_id: "user_id"
