@@ -1,18 +1,18 @@
 devMode:
   enabled: true
 
-#mongodb:
+mongodb:
 #  uri: "mongodb://qlik:Qlik1234@10.48.10.76:27017/qsefe?ssl=false"
-  # persistence:
-  #   enabled: true
-  #   accessMode: ReadWriteMany
-  #   storageClass: "azurefile"
+  persistence:
+    enabled: true
+    accessMode: ReadWriteMany
+    storageClass: "azurefile"
   # # Set the ID/GID MongoDB will use to access the PV.  This user/group matches the custom setting 
   # # used for qix-datafiles to use azurefile as well.
-  # securityContext:
-  #   enable: true
-  #   fsGroup: 63400
-  #   runAsUser: 63400
+  securityContext:
+    enable: true
+    fsGroup: 63400
+    runAsUser: 63400
 
 engine:
   acceptEULA: "yes"
