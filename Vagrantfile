@@ -2,48 +2,48 @@
 # vi: set ft=ruby :
 
 servers = [
-    {
-        :name => "k8s-head",
-        :type => "master",
-        :box => "ubuntu/bionic64",
-        :eth1 => "192.168.205.10",
-        :mem => "3200",
-        :cpu => "2"
-    },
-    {
-        :name => "k8s-node1",
-        :type => "node",
-        :box => "ubuntu/bionic64",
-        :eth1 => "192.168.205.11",
-        :mem => "4224",
-        :cpu => "2",
-        # :nfs => "true"
-    },
-    {
-        :name => "k8s-node2",
-        :type => "node",
-        :box => "ubuntu/bionic64",
-        :eth1 => "192.168.205.12",
-        :mem => "4224",
-        :cpu => "2",
-    },
-    {
-      :name => "k8s-nfs",
-      :type => "nfs",
-      :box => "ubuntu/bionic64",
-      :eth1 => "192.168.205.14",
-      :mem => "2176",
-      :cpu => "1"
-    },
+  {
+    :name => "k8s-master",
+    :type => "master",
+    :box => "ubuntu/bionic64",
+    :eth1 => "192.168.205.10",
+    :mem => "3200",
+    :cpu => "2"
+  },
+  {
+    :name => "k8s-node1",
+    :type => "node",
+    :box => "ubuntu/bionic64",
+    :eth1 => "192.168.205.11",
+    :mem => "4224",
+    :cpu => "4",
+    # :nfs => "true"
+  },
+  {
+    :name => "k8s-node2",
+    :type => "node",
+    :box => "ubuntu/bionic64",
+    :eth1 => "192.168.205.12",
+    :mem => "4224",
+    :cpu => "4",
+  },
+  {
+    :name => "k8s-nfs",
+    :type => "nfs",
+    :box => "ubuntu/bionic64",
+    :eth1 => "192.168.205.14",
+    :mem => "2176",
+    :cpu => "2"
+  },
 # Uncomment section below to enable a 3rd worker node.
-    # {
-    #   :name => "k8s-node3",
-    #   :type => "node",
-    #   :box => "ubuntu/bionic64",
-    #   :eth1 => "192.168.205.13",
-    #   :mem => "4224",
-    #   :cpu => "2",
-    # }
+  # {
+  #   :name => "k8s-node3",
+  #   :type => "node",
+  #   :box => "ubuntu/bionic64",
+  #   :eth1 => "192.168.205.13",
+  #   :mem => "4224",
+  #   :cpu => "2",
+  # }
 ]
 
 $configureBox = <<-SCRIPT
@@ -52,63 +52,67 @@ $configureBox = <<-SCRIPT
   deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF'
 
-export VERSION=18.09 && curl -sSL get.docker.com | sh
+  # Install CRI docker via install script
+  curl -sSL get.docker.com | sh
 
-# Setup daemon.
-  sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
-  {
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": {
-      "max-size": "100m"
-  },
-  "storage-driver": "overlay2"
-  }
+  # Setup daemon.
+    sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
+    {
+    "exec-opts": ["native.cgroupdriver=systemd"],
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "100m"
+    },
+    "storage-driver": "overlay2"
+    }
 EOF'
 
-    # sudo snap install --classic kubelet
-    # sudo snap install --classic kubeadm
-    # sudo snap install --classic kubectl
+  sudo mkdir -p /etc/systemd/system/docker.service.d
 
-    sudo mkdir -p /etc/systemd/system/docker.service.d
+  # Restart docker.
+  sudo systemctl daemon-reload
+  sudo systemctl restart docker
 
-    # Restart docker.
-    sudo systemctl daemon-reload
-    sudo systemctl restart docker
+  # run docker commands as vagrant user (sudo not required)
+  sudo usermod -aG docker vagrant
 
-    # run docker commands as vagrant user (sudo not required)
-    sudo usermod -aG docker vagrant
+  # # Install CRI containerd
+  # /usr/bin/wget -q https://storage.googleapis.com/cri-containerd-release/cri-containerd-1.2.8.linux-amd64.tar.gz -O /tmp/cri-containerd-1.2.8.linux-amd64.tar.gz
+  # sudo /bin/tar --no-overwrite-dir -C / -xzf /tmp/cri-containerd-1.2.8.linux-amd64.tar.gz
 
-    # Set time to ensure IdP works
-    sudo ntpdate pool.ntp.org 
+  # sudo /bin/systemctl start containerd
 
-    # kubelet requires swap off
-    sudo swapoff -a
+#   sudo bash -c 'cat <<EOF >/etc/systemd/system/kubelet.service.d/0-containerd.conf
+#   [Service]                                                 
+#   Environment="KUBELET_EXTRA_ARGS=--container-runtime=remote --runtime-request-timeout=15m --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
+# EOF'
 
-    # keep swap off after reboot
-    sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+  # systemctl daemon-reload
 
-    echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
+  sudo apt update && sudo apt install -y docker ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
 
-    sudo DEBIAN_FRONTEND=noninteractive apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
-    sudo apt install -y ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
+  echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
+  sudo DEBIAN_FRONTEND=noninteractive apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
 
-    # ip of this box
-    IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
-    # set node-ip
-    sudo echo "KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" >> /etc/default/kubelet
-    echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
-    echo "echo" >> /home/vagrant/.bashrc
-    echo "echo" >> /home/vagrant/.bashrc
-    echo "/usr/bin/neofetch" >> /home/vagrant/.bashrc
-    echo "echo" >> /home/vagrant/.bashrc
-    echo "echo" >> /home/vagrant/.bashrc
+  # Set time to ensure IdP works
+  sudo ntpdate pool.ntp.org 
 
-    # # Update apt sources to avoid 404s, do so non-interactively to deal with libssl
-    # # 
-    # echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
-    # sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-    # # sudo DEBIAN_FRONTEND=noninteractive sudo dpkg-reconfigure -a
+  # kubelet requires swap off
+  sudo swapoff -a
+
+  # keep swap off after reboot
+  sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+  # ip of this box
+  IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
+  # set node-ip
+  sudo echo "KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" >> /etc/default/kubelet
+  echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
+  echo "echo" >> /home/vagrant/.bashrc
+  echo "echo" >> /home/vagrant/.bashrc
+  echo "/usr/bin/neofetch" >> /home/vagrant/.bashrc
+  echo "echo" >> /home/vagrant/.bashrc
+  echo "echo" >> /home/vagrant/.bashrc
 SCRIPT
 
 $configureMaster = <<-SCRIPT
@@ -126,16 +130,16 @@ $configureMaster = <<-SCRIPT
     sudo --user=vagrant mkdir -p /home/vagrant/.kube
     cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
     chown $(id -u vagrant):$(id -g vagrant) /home/vagrant/.kube/config
-
-    # install Calico pod network addon
     export KUBECONFIG=/etc/kubernetes/admin.conf
+
+    # Install CNI cilium
+    # kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.6.0/install/kubernetes/quick-install.yaml
+
+    # Apply Calico RBAC
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/rbac-kdd.yaml
     
-    # Install CNI Calico (deprecated?).
+    # Install CNI Calico
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/calico.yaml
-    
-    # Install CNI Flannel
-    # kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
     kubeadm token create --print-join-command >> /etc/kubeadm_join_cmd.sh
     chmod +x /etc/kubeadm_join_cmd.sh
