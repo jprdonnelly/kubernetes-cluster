@@ -1,10 +1,4 @@
-# Default values for nfs-provisioner.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 replicaCount: 1
-
-# imagePullSecrets:
 
 image:
   repository: quay.io/kubernetes_incubator/nfs-provisioner
@@ -16,11 +10,6 @@ service:
   nfsPort: 2049
   mountdPort: 20048
   rpcbindPort: 51413
-  # nfsNodePort:
-  # mountdNodePort:
-  # rpcbindNodePort:
-
-  externalIPs: []
 
 persistence:
   enabled: true
