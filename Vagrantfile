@@ -183,13 +183,14 @@ $configureNFS = <<-SCRIPT
 
     # Label the node that will host NFS pvs
     # kubectl label nodes k8s-nfs role=nfs
-    # kubectl taint nodes k8s-nfs key=value:NoSchedule
+    # kubectl taint nodes k8s-nfs key=value:NoSchkubectl label nodes k8s-nfs role=nfsedule
 
     # echo "################################################################"
     # echo " Deploy nfs-provisioner in k8s cluster
     # echo " using dedicated disk attached to  k8s-node1"
     # echo "################################################################"
     # # Pull and apply the nfs-provisioner
+    # sleep 60
     # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
     # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
 
@@ -239,7 +240,7 @@ Vagrant.configure("2") do |config|
         if opts[:type] == "nfs"
           disk = 'nfsdisk.vmdk'
           if !File.exist?(disk)
-            nfs.customize [ "createmedium", "disk", "--filename", "nfsdisk.vmdk", "--format", "vmdk", "--size", "42240" ]
+            nfs.customize [ "createmedium", "disk", "--filename", "nfsdisk.vmdk", "--format", "vmdk", "--size", "103424" ]
             nfs.customize [ "storagectl", :id, "--name", "nvme", "--add", "pcie", "--controller", "nvme", "--portcount", "1", "--hostiocache", "on", "--bootable", "off" ]
             nfs.customize [ "storageattach", :id , "--storagectl", "nvme", "--port", "0", "--device", "0", "--type", "hdd", "--medium", "nfsdisk.vmdk" ]
             # config.vm.provision "shell", inline: $configureNFS
