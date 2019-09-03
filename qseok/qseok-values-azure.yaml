@@ -3,32 +3,55 @@ devMode:
 
 #mongodb:
 #  uri: "mongodb://qlik:Qlik1234@10.48.10.76:27017/qsefe?ssl=false"
+  # persistence:
+  #   enabled: true
+  #   accessMode: ReadWriteMany
+  #   storageClass: "azurefile"
+  # # Set the ID/GID MongoDB will use to access the PV.  This user/group matches the custom setting 
+  # # used for qix-datafiles to use azurefile as well.
+  # securityContext:
+  #   enable: true
+  #   fsGroup: 63400
+  #   runAsUser: 63400
 
 engine:
   acceptEULA: "yes"
+  featureflags:
+    enabled: true
+
+elastic-infra:
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: 10240m
+      nginx.org/client-max-body-size: 10240m
+  nginx-ingress:
+    controller:
+      extraArgs:
+        default-ssl-certificate: default/<name>
+      service:
+        annotations:
+          service.beta.kubernetes.io/azure-load-balancer-tcp-idle-timeout: '3600'
 
 identity-providers:
   secrets:
     idpConfigs:
-      - discoveryUrl: "https://djx.auth0.com/.well-known/openid-configuration"
-        clientId: "9kohQL0166VN7RcEv7P7li0gWPBjbiZO"
-        clientSecret : "NLwAqaeyGr38xl19Xb9lBXjt5ra1U-_5LKuFwxBnzvSsqmAUXaT6T7BeQGgIRYOd"
+      - discoveryUrl: "https://<TENANT>.auth0.com/.well-known/openid-configuration"
+        postLogoutRedirectUri: "https://help.qlik.com"
+        clientId: "<CLIENT_ID>"
+        clientSecret : "<CLIENT_SECRET>"
         realm: "Auth0"
-        hostname: "192.168.205.90"
-        claimsMapping:
-          client_id: [ "client_id", "azp" ]
-          groups: "/https:~1~1qlik.com~1groups"
-          sub: ["/https:~1~1qlik.com~1sub", "sub"]
+        hostname: "elastic.local"
+        # scope: "openid"
+        primary: true
+        useClaimsFromIdToken: true
+        # claimsMapping:
+          # client_id: "user_id"
+          # name: "name"
 
 global:
   persistence:
-    storageClass: "nfs-dynamic"
-
-mongodb:
-  persistence:
-    enabled: true
-    accessMode: ReadWriteMany
-    storageClass: nfs-dynamic
+    storageClass: "azurefile"
+    imageRegistry: ""
 
 featureflags:
   configmaps:
