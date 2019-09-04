@@ -56,15 +56,15 @@ EOF'
   curl -sSL get.docker.com | sh
 
   # Setup daemon.
-    sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
-    {
-    "exec-opts": ["native.cgroupdriver=systemd"],
-    "log-driver": "json-file",
-    "log-opts": {
-        "max-size": "100m"
-    },
-    "storage-driver": "overlay2"
-    }
+  sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
+  {
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+      "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+  }
 EOF'
 
   sudo mkdir -p /etc/systemd/system/docker.service.d
@@ -89,7 +89,7 @@ EOF'
 
   # systemctl daemon-reload
 
-  sudo apt update && sudo apt install -y docker ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
+  sudo apt update && sudo apt install -y docker ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common sshpass kubelet kubeadm kubectl kubernetes-cni
 
   echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
   sudo DEBIAN_FRONTEND=noninteractive apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
@@ -183,19 +183,7 @@ $configureNFS = <<-SCRIPT
 
     # Label the node that will host NFS pvs
     # kubectl label nodes k8s-nfs role=nfs
-    # kubectl taint nodes k8s-nfs key=value:NoSchkubectl label nodes k8s-nfs role=nfsedule
-
-    # echo "################################################################"
-    # echo " Deploy nfs-provisioner in k8s cluster
-    # echo " using dedicated disk attached to  k8s-node1"
-    # echo "################################################################"
-    # # Pull and apply the nfs-provisioner
-    # sleep 60
-    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
-    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
-
-    # # Define the new storage class as default
-    # kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+    # kubectl taint nodes k8s-nfs key=value:NoSchedule
 SCRIPT
 
 # Insanely broken - barely fit for testing
@@ -220,6 +208,7 @@ Vagrant.configure("2") do |config|
   end
     
   servers.each do |opts|
+    config.ssh.keep_alive = true
     config.vm.define opts[:name] do |config|
       config.vm.box = opts[:box]
       config.vm.box_version = opts[:box_version]
