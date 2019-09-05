@@ -5,7 +5,7 @@ servers = [
   {
     :name => "k8s-master",
     :type => "master",
-    :box => "ubuntu/bionic64",
+    :box => "jprdonnelly/ubuntu-1804",
     :eth1 => "192.168.205.10",
     :mem => "3200",
     :cpu => "2"
@@ -13,7 +13,7 @@ servers = [
   {
     :name => "k8s-node1",
     :type => "node",
-    :box => "ubuntu/bionic64",
+    :box => "jprdonnelly/ubuntu-1804",
     :eth1 => "192.168.205.11",
     :mem => "4224",
     :cpu => "4",
@@ -22,7 +22,7 @@ servers = [
   {
     :name => "k8s-node2",
     :type => "node",
-    :box => "ubuntu/bionic64",
+    :box => "jprdonnelly/ubuntu-1804",
     :eth1 => "192.168.205.12",
     :mem => "4224",
     :cpu => "4",
@@ -30,20 +30,20 @@ servers = [
   {
     :name => "k8s-nfs",
     :type => "nfs",
-    :box => "ubuntu/bionic64",
+    :box => "jprdonnelly/ubuntu-1804",
     :eth1 => "192.168.205.14",
     :mem => "2176",
     :cpu => "2"
   },
 # Uncomment section below to enable a 3rd worker node.
-  # {
-  #   :name => "k8s-node3",
-  #   :type => "node",
-  #   :box => "ubuntu/bionic64",
-  #   :eth1 => "192.168.205.13",
-  #   :mem => "4224",
-  #   :cpu => "2",
-  # }
+  {
+    :name => "k8s-node3",
+    :type => "node",
+    :box => "jprdonnelly/ubuntu-1804",
+    :eth1 => "192.168.205.13",
+    :mem => "8192",
+    :cpu => "4",
+  }
 ]
 
 $configureBox = <<-SCRIPT
@@ -56,15 +56,15 @@ EOF'
   curl -sSL get.docker.com | sh
 
   # Setup daemon.
-  sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
-  {
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": {
-      "max-size": "100m"
-  },
-  "storage-driver": "overlay2"
-  }
+    sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
+    {
+    "exec-opts": ["native.cgroupdriver=systemd"],
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "100m"
+    },
+    "storage-driver": "overlay2"
+    }
 EOF'
 
   sudo mkdir -p /etc/systemd/system/docker.service.d
@@ -89,7 +89,7 @@ EOF'
 
   # systemctl daemon-reload
 
-  sudo apt update && sudo apt install -y docker ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common sshpass kubelet kubeadm kubectl kubernetes-cni
+  sudo apt update && sudo apt install -y docker ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
 
   echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
   sudo DEBIAN_FRONTEND=noninteractive apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
@@ -104,7 +104,7 @@ EOF'
   sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
   # ip of this box
-  IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
+  IP_ADDR=`ifconfig eth1 | grep mask | awk '{print $2}'| cut -f2 -d:`
   # set node-ip
   sudo echo "KUBELET_EXTRA_ARGS=--node-ip=$IP_ADDR" >> /etc/default/kubelet
   echo "source <(kubectl completion bash)" >> /home/vagrant/.bashrc
@@ -120,7 +120,7 @@ $configureMaster = <<-SCRIPT
     echo "Configuring as master node"
     echo "################################################################"
     # ip of this box
-    IP_ADDR=`ifconfig enp0s8 | grep mask | awk '{print $2}'| cut -f2 -d:`
+    IP_ADDR=`ifconfig eth1 | grep mask | awk '{print $2}'| cut -f2 -d:`
 
     # install k8s master node
     HOST_NAME=$(hostname -s)
@@ -183,7 +183,19 @@ $configureNFS = <<-SCRIPT
 
     # Label the node that will host NFS pvs
     # kubectl label nodes k8s-nfs role=nfs
-    # kubectl taint nodes k8s-nfs key=value:NoSchedule
+    # kubectl taint nodes k8s-nfs key=value:NoSchkubectl label nodes k8s-nfs role=nfsedule
+
+    # echo "################################################################"
+    # echo " Deploy nfs-provisioner in k8s cluster
+    # echo " using dedicated disk attached to  k8s-node1"
+    # echo "################################################################"
+    # # Pull and apply the nfs-provisioner
+    # sleep 60
+    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
+    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
+
+    # # Define the new storage class as default
+    # kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 SCRIPT
 
 # Insanely broken - barely fit for testing
@@ -208,7 +220,6 @@ Vagrant.configure("2") do |config|
   end
     
   servers.each do |opts|
-    config.ssh.keep_alive = true
     config.vm.define opts[:name] do |config|
       config.vm.box = opts[:box]
       config.vm.box_version = opts[:box_version]
