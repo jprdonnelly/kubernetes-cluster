@@ -36,14 +36,14 @@ servers = [
     :cpu => "2"
   },
 # Uncomment section below to enable a 3rd worker node.
-  {
-    :name => "k8s-node3",
-    :type => "node",
-    :box => "jprdonnelly/ubuntu-1804",
-    :eth1 => "192.168.205.13",
-    :mem => "8192",
-    :cpu => "4",
-  }
+  # {
+  #   :name => "k8s-node3",
+  #   :type => "node",
+  #   :box => "jprdonnelly/ubuntu-1804",
+  #   :eth1 => "192.168.205.13",
+  #   :mem => "8192",
+  #   :cpu => "4",
+  # }
 ]
 
 $configureBox = <<-SCRIPT
