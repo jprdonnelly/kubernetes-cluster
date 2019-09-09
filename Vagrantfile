@@ -16,8 +16,7 @@ servers = [
     :box => "jprdonnelly/ubuntu-1804",
     :eth1 => "192.168.205.11",
     :mem => "4224",
-    :cpu => "4",
-    # :nfs => "true"
+    :cpu => "2",
   },
   {
     :name => "k8s-node2",
@@ -25,7 +24,7 @@ servers = [
     :box => "jprdonnelly/ubuntu-1804",
     :eth1 => "192.168.205.12",
     :mem => "4224",
-    :cpu => "4",
+    :cpu => "2",
   },
   {
     :name => "k8s-nfs",
@@ -41,7 +40,7 @@ servers = [
   #   :type => "node",
   #   :box => "jprdonnelly/ubuntu-1804",
   #   :eth1 => "192.168.205.13",
-  #   :mem => "8192",
+  #   :mem => "8320",
   #   :cpu => "4",
   # }
 ]
@@ -159,15 +158,22 @@ $configureMaster = <<-SCRIPT
     echo "################################################################"
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/rbac-config.yaml
 
+    echo "################################################################"
+    echo "Deploying Metrics-Server to kube-system Namespace
+    echo "################################################################"
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/metrics-server.yaml
+
     # required for setting up password less ssh between guest VMs
     sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
     sudo service sshd restart
+    sudo reboot
 SCRIPT
 
 $configureNode = <<-SCRIPT
     echo "This is a worker node"
     sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
     sudo sh ./kubeadm_join_cmd.sh
+    # kubectl taint nodes k8s-nfs key=value:NoSchedule
 SCRIPT
 
 $configureNFS = <<-SCRIPT
@@ -181,21 +187,16 @@ $configureNFS = <<-SCRIPT
     sudo chown vagrant:vagrant /storage/dynamic
     sudo chmod -R 777 /storage/dynamic
 
-    # Label the node that will host NFS pvs
-    # kubectl label nodes k8s-nfs role=nfs
-    # kubectl taint nodes k8s-nfs key=value:NoSchkubectl label nodes k8s-nfs role=nfsedule
-
     # echo "################################################################"
     # echo " Deploy nfs-provisioner in k8s cluster
-    # echo " using dedicated disk attached to  k8s-node1"
+    # echo " using dedicated disk attached to dedicated node k8s-nfs"
     # echo "################################################################"
     # # Pull and apply the nfs-provisioner
     # sleep 60
-    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
+    # kubectl taint nodes k8s-nfs key=value:NoSchedule
+    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-pvc.yaml
+    # helm install -n nfs stable/nfs-server-provisioner -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-values.yaml
     # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
-
-    # # Define the new storage class as default
-    # kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 SCRIPT
 
 # Insanely broken - barely fit for testing
@@ -235,6 +236,8 @@ Vagrant.configure("2") do |config|
       end # VB
 
       config.vm.provision "shell", inline: $configureBox
+      config.ssh.forward_x11 = true
+      config.ssh.keep_alive = true
 
       config.vm.provider "virtualbox" do |nfs|
         if opts[:type] == "nfs"
