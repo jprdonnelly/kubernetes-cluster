@@ -58,23 +58,78 @@ k8s-node2   Ready    <none>   61m   v1.15.2
 ### Install NFS Provisioner
 
 ```bash
-vagrant@k8s-head:~$ kubectl label nodes k8s-nfs role=nfs
-node/k8s-nfs labeled
- 
-vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-deployment.yaml
-service/nfs-provisioner created
-deployment.apps/nfs-provisioner created
- 
+vagrant@k8s-head:~$ kubectl taint nodes k8s-nfs key=value:NoSchedule
+node/k8s-nfs tainted
+```
+
+```bash
+vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-pvc.yaml
+persistentvolume/nfs-provisioner-vol created
+```
+
+```bash
+vagrant@k8s-head:~$ helm install -n nfs stable/nfs-server-provisioner -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-values.yaml
+NAME:   nfs
+LAST DEPLOYED: Mon Sep  9 12:59:26 2019
+NAMESPACE: default
+STATUS: DEPLOYED
+
+RESOURCES:
+==> v1/ClusterRole
+NAME                        AGE
+nfs-nfs-server-provisioner  1s
+
+==> v1/ClusterRoleBinding
+NAME                        AGE
+nfs-nfs-server-provisioner  1s
+
+==> v1/Pod(related)
+NAME                          READY  STATUS   RESTARTS  AGE
+nfs-nfs-server-provisioner-0  0/1    Pending  0         1s
+
+==> v1/Service
+NAME                        TYPE       CLUSTER-IP     EXTERNAL-IP  PORT(S)                                 AGE
+nfs-nfs-server-provisioner  ClusterIP  10.105.237.23  <none>       2049/TCP,20048/TCP,51413/TCP,51413/UDP  1s
+
+==> v1/ServiceAccount
+NAME                        SECRETS  AGE
+nfs-nfs-server-provisioner  1        1s
+
+==> v1/StorageClass
+NAME                   PROVISIONER            AGE
+nfs-dynamic (default)  provisioner.local/nfs  1s
+
+==> v1beta2/StatefulSet
+NAME                        READY  AGE
+nfs-nfs-server-provisioner  0/1    1s
+
+
+NOTES:
+The NFS Provisioner service has now been installed.
+
+A storage class named 'nfs-dynamic' has now been created
+and is available to provision dynamic volumes.
+
+You can use this storageclass by creating a `PersistentVolumeClaim` with the
+correct storageClassName attribute. For example:
+
+    ---
+    kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: test-dynamic-volume-claim
+    spec:
+      storageClassName: "nfs-dynamic"
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Mi
+```
+
+```bash
 vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
-storageclass.storage.k8s.io/nfs-dynamic created
-vagrant@k8s-head:~$ kubectl get svc
-NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                              AGE
-kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP                              18m
-nfs-provisioner   ClusterIP   10.109.234.184   <none>        2049/TCP,20048/TCP,111/TCP,111/UDP   11s
- 
-vagrant@k8s-head:~$ kubectl patch storageclass nfs-dynamic -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-storageclass.storage.k8s.io/nfs-dynamic patched
- 
+storageclass.storage.k8s.io/nfs-dynamic configured
 ```
 
 ### Clean-up
