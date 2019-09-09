@@ -68,7 +68,8 @@ persistentvolume/nfs-provisioner-vol created
 ```
 
 ```bash
-vagrant@k8s-head:~$ helm install -n nfs stable/nfs-server-provisioner -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-values.yaml
+vagrant@k8s-head:~$ helm install -n nfs stable/nfs-server-provisioner \
+-f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-values.yaml
 NAME:   nfs
 LAST DEPLOYED: Mon Sep  9 12:59:26 2019
 NAMESPACE: default
