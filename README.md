@@ -63,7 +63,8 @@ node/k8s-nfs tainted
 ```
 
 ```bash
-vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-pvc.yaml
+vagrant@k8s-head:~$ kubectl apply -f \
+https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-pvc.yaml
 persistentvolume/nfs-provisioner-vol created
 ```
 
@@ -129,7 +130,8 @@ correct storageClassName attribute. For example:
 ```
 
 ```bash
-vagrant@k8s-head:~$ kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
+vagrant@k8s-head:~$ kubectl apply -f \
+https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
 storageclass.storage.k8s.io/nfs-dynamic configured
 ```
 
