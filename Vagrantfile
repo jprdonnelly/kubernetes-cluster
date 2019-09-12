@@ -88,10 +88,10 @@ EOF'
 
   # systemctl daemon-reload
 
-  sudo apt update && sudo apt install -y docker ntpdate nmap netcat neofetch socat apt-transport-https ca-certificates curl software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
+  sudo apt-get update && sudo apt-get install -y ntpdate nmap netcat neofetch socat apt-transport-https software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
 
   echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
-  sudo DEBIAN_FRONTEND=noninteractive apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
+  sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
 
   # Set time to ensure IdP works
   sudo ntpdate pool.ntp.org 
@@ -132,13 +132,13 @@ $configureMaster = <<-SCRIPT
     export KUBECONFIG=/etc/kubernetes/admin.conf
 
     # Install CNI cilium
-    # kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.6.0/install/kubernetes/quick-install.yaml
+    kubectl create -f https://raw.githubusercontent.com/cilium/cilium/1.6.1/install/kubernetes/quick-install.yaml
 
     # Apply Calico RBAC
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/rbac-kdd.yaml
+    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/rbac-kdd.yaml
     
     # Install CNI Calico
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/calico.yaml
+    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/calico/calico.yaml
 
     kubeadm token create --print-join-command >> /etc/kubeadm_join_cmd.sh
     chmod +x /etc/kubeadm_join_cmd.sh
@@ -154,19 +154,18 @@ $configureMaster = <<-SCRIPT
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/metallb/layer-2.yaml
 
     echo "################################################################"
-    echo " Apply RBAC settings for tiller"
+    echo "Apply RBAC settings for tiller"
     echo "################################################################"
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/rbac-config.yaml
 
     echo "################################################################"
-    echo "Deploying Metrics-Server to kube-system Namespace
+    echo "Deploying Metrics-Server to kube-system Namespace"
     echo "################################################################"
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/metrics-server.yaml
 
     # required for setting up password less ssh between guest VMs
     sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
     sudo service sshd restart
-    sudo reboot
 SCRIPT
 
 $configureNode = <<-SCRIPT
