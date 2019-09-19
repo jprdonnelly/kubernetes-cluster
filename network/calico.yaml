@@ -641,7 +641,7 @@ spec:
             exec:
               command:
               - /bin/calico-node
-              - -felix-live
+              # - -felix-live
             periodSeconds: 10
             initialDelaySeconds: 10
             failureThreshold: 6
@@ -649,7 +649,7 @@ spec:
             exec:
               command:
               - /bin/calico-node
-              - -felix-ready
+              # - -felix-ready
               - -bird-ready
             periodSeconds: 10
           volumeMounts:
