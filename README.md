@@ -3,8 +3,9 @@ A [Vagrant](https://www.vagrantup.com/) script for setting up a barebones [Kuber
 
 ### Pre-requisites
 
- * **[Vagrant 2.1.4+](https://www.vagrantup.com)**
- * **[Virtualbox 5.2.18+](https://www.virtualbox.org)**
+ * **[Vagrant 2.2.4+](https://www.vagrantup.com)**
+ * **[Virtualbox 6+](https://www.virtualbox.org)**
+ * **[Virtualbox Proprietary Extension Pack](https://download.virtualbox.org/virtualbox/6.0.12/Oracle_VM_VirtualBox_Extension_Pack-6.0.12.vbox-extpack)**
 
 ### Start the Base Cluster
 
