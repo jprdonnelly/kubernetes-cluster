@@ -88,7 +88,7 @@ EOF'
 
   # systemctl daemon-reload
 
-  sudo apt-get update && sudo apt-get install -y ntpdate nmap netcat neofetch socat apt-transport-https software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
+  sudo apt-get update && sudo apt-get install -y bash-completion ntpdate nmap netcat neofetch socat apt-transport-https software-properties-common nfs-common sshpass kubelet kubeadm kubectl kubernetes-cni
 
   echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
   sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
@@ -156,12 +156,12 @@ $configureMaster = <<-SCRIPT
     echo "################################################################"
     echo "Apply RBAC settings for tiller"
     echo "################################################################"
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/rbac-config.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/base/rbac-config.yaml
 
     echo "################################################################"
     echo "Deploying Metrics-Server to kube-system Namespace"
     echo "################################################################"
-    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/qseok/metrics-server.yaml
+    kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/base/metrics-server.yaml
 
     # required for setting up password less ssh between guest VMs
     sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
