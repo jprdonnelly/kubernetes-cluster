@@ -11,6 +11,14 @@ servers = [
     :cpu => "2"
   },
   {
+    :name => "k8s-nfs",
+    :type => "nfs",
+    :box => "jprdonnelly/ubuntu-1804",
+    :eth1 => "192.168.205.14",
+    :mem => "2176",
+    :cpu => "2"
+  },
+  {
     :name => "k8s-node1",
     :type => "node",
     :box => "jprdonnelly/ubuntu-1804",
@@ -25,14 +33,6 @@ servers = [
     :eth1 => "192.168.205.12",
     :mem => "4224",
     :cpu => "2",
-  },
-  {
-    :name => "k8s-nfs",
-    :type => "nfs",
-    :box => "jprdonnelly/ubuntu-1804",
-    :eth1 => "192.168.205.14",
-    :mem => "2176",
-    :cpu => "2"
   },
 # Uncomment section below to enable a 3rd worker node.
   # {
@@ -173,7 +173,7 @@ $configureNode = <<-SCRIPT
     echo "This is a worker node"
     sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
     sudo sh ./kubeadm_join_cmd.sh
-    # kubectl taint nodes k8s-nfs key=value:NoSchedule
+    kubectl taint nodes k8s-nfs key=value:NoSchedule
 SCRIPT
 
 $configureNFS = <<-SCRIPT
