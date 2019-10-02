@@ -46,34 +46,34 @@ servers = [
 ]
 
 $configureBox = <<-SCRIPT
-  curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-  sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-  deb http://apt.kubernetes.io/ kubernetes-xenial main
-EOF'
+#   curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+#   sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+#   deb http://apt.kubernetes.io/ kubernetes-xenial main
+# EOF'
 
-  # Install CRI docker via install script
-  curl -sSL get.docker.com | sh
+#   # Install CRI docker via install script
+#   curl -sSL get.docker.com | sh
 
-  # Setup daemon.
-    sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
-    {
-    "exec-opts": ["native.cgroupdriver=systemd"],
-    "log-driver": "json-file",
-    "log-opts": {
-        "max-size": "100m"
-    },
-    "storage-driver": "overlay2"
-    }
-EOF'
+#   # Setup daemon.
+#     sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
+#     {
+#     "exec-opts": ["native.cgroupdriver=systemd"],
+#     "log-driver": "json-file",
+#     "log-opts": {
+#         "max-size": "100m"
+#     },
+#     "storage-driver": "overlay2"
+#     }
+# EOF'
 
-  sudo mkdir -p /etc/systemd/system/docker.service.d
+  # sudo mkdir -p /etc/systemd/system/docker.service.d
 
-  # Restart docker.
-  sudo systemctl daemon-reload
-  sudo systemctl restart docker
+  # # Restart docker.
+  # sudo systemctl daemon-reload
+  # sudo systemctl restart docker
 
-  # run docker commands as vagrant user (sudo not required)
-  sudo usermod -aG docker vagrant
+  # # run docker commands as vagrant user (sudo not required)
+  # sudo usermod -aG docker vagrant
 
   # # Install CRI containerd
   # /usr/bin/wget -q https://storage.googleapis.com/cri-containerd-release/cri-containerd-1.2.8.linux-amd64.tar.gz -O /tmp/cri-containerd-1.2.8.linux-amd64.tar.gz
@@ -88,11 +88,11 @@ EOF'
 
   # systemctl daemon-reload
 
-  sudo apt-get update && sudo apt-get install -y bash-completion ntpdate nmap netcat neofetch socat apt-transport-https software-properties-common nfs-common sshpass kubelet=1.15.4-00 kubeadm=1.15.4-00 kubectl=1.15.4-00 kubernetes-cni
+  # sudo apt-get update && sudo apt-get install -y bash-completion ntpdate nmap netcat neofetch socat apt-transport-https software-properties-common nfs-common sshpass kubelet=1.15.4-00 kubeadm=1.15.4-00 kubectl=1.15.4-00 kubernetes-cni
   sudo apt-mark hold kubelet kubeadm kubectl
 
-  echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
-  sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+  # echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
+  # sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
 
   # Set time to ensure IdP works
   sudo ntpdate pool.ntp.org 
@@ -173,7 +173,6 @@ $configureNode = <<-SCRIPT
     echo "This is a worker node"
     sshpass -p "vagrant" scp -o StrictHostKeyChecking=no vagrant@192.168.205.10:/etc/kubeadm_join_cmd.sh .
     sudo sh ./kubeadm_join_cmd.sh
-    kubectl taint nodes k8s-nfs key=value:NoSchedule
 SCRIPT
 
 $configureNFS = <<-SCRIPT
@@ -193,10 +192,10 @@ $configureNFS = <<-SCRIPT
     # echo "################################################################"
     # # Pull and apply the nfs-provisioner
     # sleep 60
+    # helm init --service-account tiller --wait
     # kubectl taint nodes k8s-nfs key=value:NoSchedule
     # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-pvc.yaml
     # helm install -n nfs stable/nfs-server-provisioner -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-values.yaml
-    # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
 SCRIPT
 
 # Insanely broken - barely fit for testing
