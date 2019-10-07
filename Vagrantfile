@@ -181,8 +181,8 @@ $configureNFS = <<-SCRIPT
     echo "################################################################"
     sudo mkdir -p /storage/dynamic
     sudo mkdir -p /export
-    sudo mkfs.xfs -f /dev/nvme0n1
-    sudo mount /dev/nvme0n1 /storage/dynamic
+    sudo mkfs.xfs -f /dev/sdb
+    sudo mount /dev/sdb /storage/dynamic
     sudo chown vagrant:vagrant /storage/dynamic
     sudo chmod -R 777 /storage/dynamic
 
@@ -192,7 +192,6 @@ $configureNFS = <<-SCRIPT
     # echo "################################################################"
     # # Pull and apply the nfs-provisioner
     # sleep 60
-    # helm init --service-account tiller --wait
     # kubectl taint nodes k8s-nfs key=value:NoSchedule
     # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-pvc.yaml
     # helm install -n nfs stable/nfs-server-provisioner -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-values.yaml
@@ -243,13 +242,10 @@ Vagrant.configure("2") do |config|
           disk = 'nfsdisk.vmdk'
           if !File.exist?(disk)
             nfs.customize [ "createmedium", "disk", "--filename", "nfsdisk.vmdk", "--format", "vmdk", "--size", "103424" ]
-            nfs.customize [ "storagectl", :id, "--name", "nvme", "--add", "pcie", "--controller", "nvme", "--portcount", "1", "--hostiocache", "on", "--bootable", "off" ]
-            nfs.customize [ "storageattach", :id , "--storagectl", "nvme", "--port", "0", "--device", "0", "--type", "hdd", "--medium", "nfsdisk.vmdk" ]
-            # config.vm.provision "shell", inline: $configureNFS
+            nfs.customize [ "storagectl", :id, "--name", "SATA Controller", "--controller", "IntelAhci", "--portcount", "2", "--hostiocache", "on", "--bootable", "on" ]
+            nfs.customize [ "storageattach", :id , "--storagectl", "SATA Controller", "--port", "1", "--device", "0", "--type", "hdd", "--medium", "nfsdisk.vmdk" ]
           else
-            # nfs.customize [ "storagectl", :id, "--name", "nvme", "--add", "pcie", "--controller", "nvme", "--portcount", "1", "--hostiocache", "on", "--bootable", "off" ]
-            nfs.customize [ "storageattach", :id , "--storagectl", "nvme", "--port", "0", "--device", "0", "--type", "hdd", "--medium", "nfsdisk.vmdk" ]
-            # config.vm.provision "shell", inline: $configureNFS
+            nfs.customize [ "storageattach", :id , "--storagectl", "SATA Controller", "--port", "1", "--device", "0", "--type", "hdd", "--medium", "nfsdisk.vmdk" ]
           end
         end # End if NFS
       end # config NFS
