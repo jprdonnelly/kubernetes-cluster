@@ -5,7 +5,7 @@ A [Vagrant](https://www.vagrantup.com/) script for setting up a barebones [Kuber
 
  * **[Vagrant 2.2.4+](https://www.vagrantup.com)**
  * **[Virtualbox 6+](https://www.virtualbox.org)**
- * **[Virtualbox Proprietary Extension Pack](https://download.virtualbox.org/virtualbox/6.0.12/Oracle_VM_VirtualBox_Extension_Pack-6.0.12.vbox-extpack)**
+ * Do NOT install the proprietary extension pack from Oracle - it is non-free and they have started to track IP addresses and demand license fees.
 
 ### Start the Base Cluster
 
