@@ -5,7 +5,10 @@ A [Vagrant](https://www.vagrantup.com/) script for setting up a barebones [Kuber
 
  * **[Vagrant 2.2.4+](https://www.vagrantup.com)**
  * **[Virtualbox 6+](https://www.virtualbox.org)**
+ 
  * Do NOT install the proprietary extension pack from Oracle - it is non-free and they have started to track IP addresses and demand license fees.
+ 
+ * Do NOT use Powershell ISE - when attempting to SSH, ISE will lockup.  Please use CMD/Powershell or a *nix OS.
 
 ### Start the Base Cluster
 
