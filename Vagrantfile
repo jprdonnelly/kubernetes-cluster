@@ -88,7 +88,7 @@ $configureBox = <<-SCRIPT
 
   # systemctl daemon-reload
 
-  # sudo apt-get update && sudo apt-get install -y bash-completion ntpdate nmap netcat neofetch socat apt-transport-https software-properties-common nfs-common sshpass kubelet=1.15.4-00 kubeadm=1.15.4-00 kubectl=1.15.4-00 kubernetes-cni
+  # sudo apt-get update && sudo apt-get install -y bash-completion ntpdate nmap netcat neofetch socat apt-transport-https software-properties-common nfs-common sshpass kubelet=1.15.5-00 kubeadm=1.15.5-00 kubectl=1.15.5-00 kubernetes-cni
   # sudo apt-mark hold kubelet kubeadm kubectl
 
   # echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
