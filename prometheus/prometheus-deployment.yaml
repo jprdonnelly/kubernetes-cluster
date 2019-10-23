@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: prometheus-deployment
-  namespace: default
+  namespace: monitoring
 spec:
   replicas: 1
   template:
@@ -25,11 +25,11 @@ spec:
               mountPath: /prometheus/
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "500m"
-            limits:
               memory: "1Gi"
               cpu: "1000m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
       volumes:
         - name: prometheus-config-volume
           configMap:
