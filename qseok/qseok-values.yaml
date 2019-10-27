@@ -15,10 +15,10 @@ identity-providers:
         clientSecret: "<CLIENT_SEECRET>"
         realm: "Auth0"
         hostname: "<INGRESS_IP/HOSTNAME>"
-        claimsMapping:
-          client_id: [ "client_id", "azp" ]
-          groups: "/https:~1~1qlik.com~1groups"
-          sub: ["/https:~1~1qlik.com~1sub", "sub"]
+        useClaimsFromIdToken: true
+        # claimsMapping:
+          # client_id: "user_id"
+          # name: "name"
 
 # We use a global persistence statement for maximum compatibility with future releases.  This will create multiple PVCs.
 global:
