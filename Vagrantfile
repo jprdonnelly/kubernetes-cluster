@@ -194,7 +194,7 @@ $configureNFS = <<-SCRIPT
     # sleep 60
     # kubectl taint nodes k8s-nfs key=value:NoSchedule
     # kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-pvc.yaml
-    # helm install -n nfs stable/nfs-server-provisioner -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-values.yaml
+    # helm install -n nfs stable/nfs-server-provisioner --namespace nfs -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-helm-values.yaml
 SCRIPT
 
 # Insanely broken - barely fit for testing
