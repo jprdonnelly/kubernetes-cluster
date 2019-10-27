@@ -6,7 +6,7 @@ devMode:
 engine:
   acceptEULA: "yes"
 
-identity-providers:           
+identity-providers:
   secrets:
     idpConfigs:
       - discoveryUrl: "https://<TENANT>.auth0.com/.well-known/openid-configuration"
@@ -19,7 +19,7 @@ identity-providers:
           client_id: [ "client_id", "azp" ]
           groups: "/https:~1~1qlik.com~1groups"
           sub: ["/https:~1~1qlik.com~1sub", "sub"]
-          
+
 # We use a global persistence statement for maximum compatibility with future releases.  This will create multiple PVCs.
 global:
   persistence:
