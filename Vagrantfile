@@ -164,6 +164,16 @@ $configureMaster = <<-SCRIPT
     echo "################################################################"
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/base/metrics-server.yaml
 
+    echo "################################################################"
+    echo "Deploying Helm and Init Tiller"
+    echo "################################################################"
+    curl -o /home/vagrant/get_helm.sh -LO https://git.io/get_helm.sh
+    chmod +x /home/vagrant/get_helm.sh
+    /home/vagrant/get_helm.sh --version v2.14.3
+    sleep 5
+    /usr/local/bin/helm init --service-account tiller --wait
+    /usr/local/bin/helm version
+
     # required for setting up password less ssh between guest VMs
     sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
     sudo service sshd restart
