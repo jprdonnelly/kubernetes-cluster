@@ -59,6 +59,43 @@ k8s-nfs     Ready    <none>   53m   v1.15.2
 k8s-node1   Ready    <none>   65m   v1.15.2
 k8s-node2   Ready    <none>   61m   v1.15.2
 ```
+
+### Install Helm
+
+```bash
+vagrant@k8s-master:~$ curl -LO https://git.io/get_helm.sh
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  7034  100  7034    0     0  40425      0 --:--:-- --:--:-- --:--:-- 40425
+vagrant@k8s-master:~$ chmod +x ./get_helm.sh
+vagrant@k8s-master:~$ ./get_helm.sh --version v2.14.3
+Downloading https://get.helm.sh/helm-v2.14.3-linux-amd64.tar.gz
+Preparing to install helm and tiller into /usr/local/bin
+helm installed into /usr/local/bin/helm
+tiller installed into /usr/local/bin/tiller
+Run 'helm init' to configure helm.
+vagrant@k8s-master:~$ helm init --service-account tiller --wait
+Creating /home/vagrant/.helm
+Creating /home/vagrant/.helm/repository
+Creating /home/vagrant/.helm/repository/cache
+Creating /home/vagrant/.helm/repository/local
+Creating /home/vagrant/.helm/plugins
+Creating /home/vagrant/.helm/starters
+Creating /home/vagrant/.helm/cache/archive
+Creating /home/vagrant/.helm/repository/repositories.yaml
+Adding stable repo with URL: https://kubernetes-charts.storage.googleapis.com
+Adding local repo with URL: http://127.0.0.1:8879/charts
+$HELM_HOME has been configured at /home/vagrant/.helm.
+
+Tiller (the Helm server-side component) has been installed into your Kubernetes Cluster.
+
+Please note: by default, Tiller is deployed with an insecure 'allow unauthenticated users' policy.
+To prevent this, run `helm init` with the --tiller-tls-verify flag.
+For more information on securing your installation see: https://docs.helm.sh/using_helm/#securing-your-helm-installation
+vagrant@k8s-master:~$
+```
+
 ### Install NFS Provisioner
 
 ```bash
