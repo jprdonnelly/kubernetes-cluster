@@ -54,25 +54,11 @@ $configureBox = <<-SCRIPT
 #   # Install CRI docker via install script
 #   curl -sSL get.docker.com | sh
 
-#   # Setup daemon.
-#     sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
-#     {
-#     "exec-opts": ["native.cgroupdriver=systemd"],
-#     "log-driver": "json-file",
-#     "log-opts": {
-#         "max-size": "100m"
-#     },
-#     "storage-driver": "overlay2"
-#     }
-# EOF'
+#   # Restart docker.
+#   sudo systemctl daemon-reload
+#   sudo systemctl restart docker
 
-  # sudo mkdir -p /etc/systemd/system/docker.service.d
-
-  # # Restart docker.
-  # sudo systemctl daemon-reload
-  # sudo systemctl restart docker
-
-  # # run docker commands as vagrant user (sudo not required)
+  # run docker commands as vagrant user (sudo not required)
   # sudo usermod -aG docker vagrant
 
   # # Install CRI containerd
