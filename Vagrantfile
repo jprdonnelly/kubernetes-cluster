@@ -54,25 +54,11 @@ $configureBox = <<-SCRIPT
 #   # Install CRI docker via install script
 #   curl -sSL get.docker.com | sh
 
-#   # Setup daemon.
-#     sudo bash -c 'cat <<EOF> /etc/docker/daemon.json 
-#     {
-#     "exec-opts": ["native.cgroupdriver=systemd"],
-#     "log-driver": "json-file",
-#     "log-opts": {
-#         "max-size": "100m"
-#     },
-#     "storage-driver": "overlay2"
-#     }
-# EOF'
+#   # Restart docker.
+#   sudo systemctl daemon-reload
+#   sudo systemctl restart docker
 
-  # sudo mkdir -p /etc/systemd/system/docker.service.d
-
-  # # Restart docker.
-  # sudo systemctl daemon-reload
-  # sudo systemctl restart docker
-
-  # # run docker commands as vagrant user (sudo not required)
+  # run docker commands as vagrant user (sudo not required)
   # sudo usermod -aG docker vagrant
 
   # # Install CRI containerd
@@ -163,6 +149,16 @@ $configureMaster = <<-SCRIPT
     echo "Deploying Metrics-Server to kube-system Namespace"
     echo "################################################################"
     kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/base/metrics-server.yaml
+
+#    echo "################################################################"
+#    echo "Deploying Helm and Init Tiller"
+#    echo "################################################################"
+#    curl -o /home/vagrant/get_helm.sh -LO https://git.io/get_helm.sh
+#    chmod +x /home/vagrant/get_helm.sh
+#    /home/vagrant/get_helm.sh --version v2.14.3
+#    sleep 5
+#    /usr/local/bin/helm init --service-account tiller --wait
+#    /usr/local/bin/helm version
 
     # required for setting up password less ssh between guest VMs
     sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config

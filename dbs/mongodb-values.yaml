@@ -161,7 +161,7 @@ replicaSet:
   ## Number of replicas per each node type
   ##
   replicas:
-    secondary: 2
+    secondary: 1
     arbiter: 1
 
   ## Pod Disruption Budget
