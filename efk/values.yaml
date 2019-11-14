@@ -1,127 +1,16 @@
-# Default values for efk.
+# Default values for efk-aks.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
 
-# https://github.com/helm/charts/blob/master/stable/kibana/values.yaml
+namespace: logging
+
+elastic:
+  replicaCount: 1
+  MINIMUM_MASTER_NODES: 1
+  version: "v6.2.5"
+
+fluentd:
+  version: "v2.2.0"
+
 kibana:
-  image:
-    repository: "docker.elastic.co/kibana/kibana-oss"
-    tag: "7.3.2"
-  env:
-    # All Kibana configuration options are adjustable via env vars.
-    # To adjust a config option to an env var uppercase + replace `.` with `_`
-    # Ref: https://www.elastic.co/guide/en/kibana/current/settings.html
-    #
-    ELASTICSEARCH_URL: http://elastic.brown:9200
-    SERVER_PORT: 5601
-    LOGGING_VERBOSE: "true"
-    SERVER_DEFAULTROUTE: "/app/kibana"
-
-# https://github.com/komljen/helm-charts/blob/master/elasticsearch/values.yaml
-elasticsearch:
-  spec:
-    use-ssl: false
-    elastic-search-image: docker.elastic.co/elasticsearch/elasticsearch:7.3.2
-    client-node-replicas: 1
-    master-node-replicas: 1
-    data-node-replicas: 1
-    network-host: 0.0.0.0
-    zones: []
-    data-volume-size: 10Gi
-    client-java-options: "-Xms1024m -Xmx1024m"
-    master-java-options: "-Xms2048m -Xmx2048m"
-    data-java-options: "-Xms2048m -Xmx2048m"
-    snapshot:
-      scheduler-enabled: false
-      repo-type: s3
-      bucket-name: efk-snapshots
-      cron-schedule: "0 2 * * *"
-      repo-region: us-east-1
-      image: komljen/elasticsearch-cron:0.0.6
-    storage:
-      # e.g. gp2 for AWS
-      type: nfs-dynamic
-      # e.g. kubernetes.io/aws-ebs for AWS
-      classProvisioner: volume.alpha.kubernetes.io/storage-class
-      # Retain or Delete
-      reclaimPolicy: Delete
-    resources:
-      requests:
-        memory: 1024Mi
-        cpu: 200m
-      limits:
-        memory: 2048Mi
-        cpu: '1'
-
-# https://github.com/helm/charts/blob/master/stable/fluent-bit/values.yaml
-fluent-bit:
-  enabled: true
-  image:
-    fluent_bit:
-      repository: fluent/fluent-bit
-      tag: 1.1.1
-  backend:
-    type: es
-    es:
-      host: elastic.brown
-      port: 9200
-      index: kubernetes_cluster
-      logstash_prefix: kubernetes_cluster
-
-# https://github.com/helm/charts/blob/master/stable/elasticsearch-curator/values.yaml
-elasticsearch-curator:
-  config:
-    elasticsearch:
-      hosts:
-        - elastic.brown
-
-# https://github.com/helm/charts/blob/master/stable/filebeat/values.yaml
-filebeat:
-  enabled: false
-  config:
-    setup.template.name: "kubernetes_cluster"
-    setup.template.pattern: "kubernetes_cluster-*"
-    processors:
-    - decode_json_fields:
-        fields: ["message"]
-        process_array: true
-        max_depth: 8
-        target: ""
-    filebeat.prospectors:
-      - type: docker
-        containers.ids:
-        - "*"
-        processors:
-          - add_kubernetes_metadata:
-              in_cluster: true
-          - drop_event:
-              when:
-                equals:
-                  kubernetes.container.name: "filebeat"
-    output.file:
-      enabled: false
-    output.elasticsearch:
-      hosts: ["http://elastic.brown:9200"]
-      index: "kubernetes_cluster-%{+yyyy.MM.dd}"
-  privileged: true
-
-# https://github.com/helm/charts/blob/master/stable/metricbeat/values.yaml
-metricbeat:
-  enabled: false
-  daemonset:
-    enabled: false
-
-  deployment:
-    config:
-      setup.template.name: "kubernetes_events"
-      setup.template.pattern: "kubernetes_events-*"
-      output.elasticsearch:
-        hosts: ["http://elastic.brown:9200"]
-        index: "kubernetes_events-%{[beat.version]}-%{+yyyy.MM.dd}"
-      output.file:
-        enabled: false
-    modules:
-      kubernetes:
-        enabled: true
-        config:
-          - module: kubernetes
-            metricsets:
-              - event
+  version: "6.2.4"
