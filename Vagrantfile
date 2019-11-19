@@ -195,7 +195,7 @@ SCRIPT
 
 # Insanely broken - barely fit for testing
 # $configureIngress = <<-SCRIPT
-#   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+#   https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/ingress/mandatory.yaml
 #   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
 # SCRIPT
 
