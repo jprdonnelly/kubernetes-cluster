@@ -24,7 +24,7 @@ filebeat:
   #   - elastic-stack-elasticsearch-client:9200
 
 fluentd:
-  enabled: true
+  enabled: false
 
 fluent-bit:
   enabled: false
