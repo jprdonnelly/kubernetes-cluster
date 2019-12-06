@@ -23,26 +23,26 @@ servers = [
     :type => "node",
     :box => "jprdonnelly/ubuntu-1804",
     :eth1 => "192.168.205.11",
-    :mem => "8320",
-    :cpu => "4",
+    :mem => "4224",
+    :cpu => "2",
   },
   {
     :name => "k8s-node2",
     :type => "node",
     :box => "jprdonnelly/ubuntu-1804",
     :eth1 => "192.168.205.12",
-    :mem => "8320",
-    :cpu => "4",
+    :mem => "4224",
+    :cpu => "2",
   },
 # Uncomment section below to enable a 3rd worker node.
-  {
-    :name => "k8s-node3",
-    :type => "node",
-    :box => "jprdonnelly/ubuntu-1804",
-    :eth1 => "192.168.205.13",
-    :mem => "8320",
-    :cpu => "4",
-  }
+  #{
+  #  :name => "k8s-node3",
+  #  :type => "node",
+  #  :box => "jprdonnelly/ubuntu-1804",
+  #  :eth1 => "192.168.205.13",
+  #  :mem => "8320",
+  #  :cpu => "4",
+  #}
 ]
 
 $configureBox = <<-SCRIPT
@@ -195,7 +195,7 @@ SCRIPT
 
 # Insanely broken - barely fit for testing
 # $configureIngress = <<-SCRIPT
-#   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+#   kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/ingress/mandatory.yaml
 #   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
 # SCRIPT
 
