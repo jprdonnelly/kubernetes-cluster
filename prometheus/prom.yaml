@@ -109,7 +109,7 @@ alertmanager:
     ## Must be provided if Ingress is enabled
     ##
     hosts:
-      - alertmanager.aks
+      - alertmanager.local
     #   - domain.com/alertmanager
 
     ## alertmanager Ingress TLS configuration
@@ -663,7 +663,7 @@ server:
     ## Must be provided if Ingress is enabled
     ##
     hosts:
-      - prometheus.aks
+      - prometheus.local
     #   - domain.com/prometheus
 
     ## Prometheus server Ingress TLS configuration
@@ -887,7 +887,7 @@ pushgateway:
     ## Must be provided if Ingress is enabled
     ##
     hosts:
-      - pushgateway.aks
+      - pushgateway.local
     #   - domain.com/pushgateway
 
     ## pushgateway Ingress TLS configuration
