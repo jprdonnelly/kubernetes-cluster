@@ -170,12 +170,6 @@ correct storageClassName attribute. For example:
           storage: 100Mi
 ```
 
-```bash
-vagrant@k8s-head:~$ kubectl apply -f \
-https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/nfs-provisioner/nfs-class.yaml
-storageclass.storage.k8s.io/nfs-dynamic configured
-```
-
 ### Clean-up
 
 Execute the following command to remove the virtual machines created for the Kubernetes cluster.
