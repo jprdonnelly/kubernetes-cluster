@@ -9,11 +9,11 @@ Running K8s with Ingress (not the service deployed by QSEoK)
 
 Run the following commands to create the "idp" namespace and upload the secret (the entire realm.json file)
 ```bash
-kubectl create namespace idp
+kubectl create namespace keycloak
 ```
 This command below utilizes a "realm.json" file located in current path.
 ```bash
-kubectl create secret --namespace idp generic realm-secret --from-file=./realm.json
+kubectl create secret --namespace keycloak generic realm-secret --from-file=./realm.json
 ```
 
 Create namespace and deploy nginx-ingress
@@ -29,7 +29,7 @@ helm install -n ingress --namespace ingress stable/nginx-ingress
 ### Deploy Keycloak
 
 ```bash
-helm install -n keycloak --namespace idp codecentric/keycloak -f ./keycloak-values.yaml
+helm install -n keycloak --namespace keycloak codecentric/keycloak -f ./keycloak-values.yaml
 ```
 Update /etc/hosts to point "keycloak.local" to 192.168.205.91 (second address dealt from MetalLB)
 
