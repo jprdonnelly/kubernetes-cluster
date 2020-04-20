@@ -46,40 +46,6 @@ servers = [
 ]
 
 $configureBox = <<-SCRIPT
-#   curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-#   sudo bash -c 'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-#   deb http://apt.kubernetes.io/ kubernetes-xenial main
-# EOF'
-
-#   # Install CRI docker via install script
-#   curl -sSL get.docker.com | sh
-
-#   # Restart docker.
-#   sudo systemctl daemon-reload
-#   sudo systemctl restart docker
-
-  # run docker commands as vagrant user (sudo not required)
-  # sudo usermod -aG docker vagrant
-
-  # # Install CRI containerd
-  # /usr/bin/wget -q https://storage.googleapis.com/cri-containerd-release/cri-containerd-1.2.8.linux-amd64.tar.gz -O /tmp/cri-containerd-1.2.8.linux-amd64.tar.gz
-  # sudo /bin/tar --no-overwrite-dir -C / -xzf /tmp/cri-containerd-1.2.8.linux-amd64.tar.gz
-
-  # sudo /bin/systemctl start containerd
-
-#   sudo bash -c 'cat <<EOF >/etc/systemd/system/kubelet.service.d/0-containerd.conf
-#   [Service]                                                 
-#   Environment="KUBELET_EXTRA_ARGS=--container-runtime=remote --runtime-request-timeout=15m --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
-# EOF'
-
-  # systemctl daemon-reload
-
-  # sudo apt-get update && sudo apt-get install -y bash-completion ntpdate nmap netcat neofetch socat apt-transport-https software-properties-common nfs-common sshpass kubelet=1.15.5-00 kubeadm=1.15.5-00 kubectl=1.15.5-00 kubernetes-cni
-  # sudo apt-mark hold kubelet kubeadm kubectl
-
-  # echo "libssl1.1 libssl1.1/restart-services boolean true" | sudo debconf-set-selections
-  # sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-
   # Set time to ensure IdP works
   sudo ntpdate pool.ntp.org 
 
@@ -162,6 +128,9 @@ $configureMaster = <<-SCRIPT
 
     # required for setting up password less ssh between guest VMs
     sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
+    sudo sed -i "s/^.*TCPKeepAlive.*$/TCPKeepAlive yes/" /etc/ssh/sshd_config
+    sudo sed -i "s/^.*ClientAliveInterval.*$/ClientAliveInterval 600/" /etc/ssh/sshd_config
+    sudo sed -i "s/^.*ClientAliveCountMax.*$/ClientAliveCountMax 10/" /etc/ssh/sshd_config
     sudo service sshd restart
 SCRIPT
 
@@ -195,8 +164,8 @@ SCRIPT
 
 # Insanely broken - barely fit for testing
 # $configureIngress = <<-SCRIPT
-#   kubectl apply -f https://raw.githubusercontent.com/jprdonnelly/kubernetes-cluster/master/ingress/mandatory.yaml
-#   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
+#   kubectl apply --namespace ingress-nginx -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+#   kubectl apply --namespace ingress-nginx -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
 # SCRIPT
 
 Vagrant.configure("2") do |config|
